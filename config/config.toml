@@ -93,7 +93,11 @@ pto = []
 # Where the epics come from: "csv" (manual export) or "api" (Jira Cloud REST).
 # Can be overridden on the command line with --source.
 source = "csv"
-csv = "data/epics.csv"
+# raw_csv = the untouched export you drop from Jira. `./dpe clean` reads it and
+# writes the tidy `csv` below. Point it at a file, or at a folder — if it's a
+# folder, the most recent *.csv inside wins (so a folder of dated exports works).
+raw_csv = "data/raw"
+csv = "data/epics.csv"          # the cleaned file everything else reads
 # "points" or "days". If points, converts using points_to_days.
 estimate_unit = "points"
 points_to_days = 1.5
@@ -103,6 +107,9 @@ default_estimate_days = 10
 skill_label_prefix = "skill:"
 # Label that requires a minimum seniority: "min:senior" -> senior or principal only
 min_seniority_label_prefix = "min:"
+# Label that assigns an owner: "owner:alex" or "owner:alex:60" (60% FTE).
+# Several owner labels on one epic = shared ownership, co-scheduled.
+owner_label_prefix = "owner:"
 # Statuses that mean "already delivered" — they drop out of the roadmap.
 done_statuses = ["Done", "Closed", "Resolved", "Cancelled"]
 # Jira priority order (first = most urgent).
@@ -119,43 +126,26 @@ priority_order = ["Highest", "High", "Medium", "Low", "Lowest"]
 # forced here, and `validate` warns if the key does not exist in the backlog.
 # ---------------------------------------------------------------------------
 [priority]
-"DPE-114" = "Highest"   # the catalog became a commitment to leadership
-"DPE-105" = "Low"       # can wait, nobody is blocked
+"DPE-1141" = "Highest"   # the catalog became a commitment to leadership
+"DPE-1051" = "Low"       # can wait, nobody is blocked
 
 # ---------------------------------------------------------------------------
-# WHO IS WORKING ON WHAT  —  this is the part you maintain by hand.
+# WHO IS WORKING ON WHAT  —  lives entirely in Jira, as owner: labels.
 #
-# Everything here is FACT: the tool neither picks nor reallocates, it only computes
-# the dates. Every epic NOT listed here is open backlog, and the tool suggests an
-# owner (see `./dpe suggest`).
+# There is NO assignment table here anymore. On the epic in Jira, add:
 #
-#   epic   = the Jira key, exactly as it appears there (DPE-101)
-#   person = must match a name in [[people]]
-#   fte    = how much of THIS person goes into THIS epic.
-#            1.0 = fully dedicated. 0.5 = half, leaving half for another epic.
-#            Add up a person's fte: past 1.0 they are overcommitted and
-#            `./dpe validate` warns you.
+#   owner:alex             Alex owns it, 100% dedicated
+#   owner:daniell:60       Daniell, 60% of his day on it (40% free for other work)
+#   owner:alex owner:oscar two owners, shared and co-scheduled (they finish together)
 #
-# A manual assignment is respected even if the person lacks the skill —
-# that is your call. But it gets marked on the roadmap so you don't lose track.
-# ---------------------------------------------------------------------------
-
-[[assignments]]
-epic = "DPE-1011"
-person = "Alex"
-fte = 1.0
-note = "migration in progress"
-
-[[assignments]]
-epic = "DPE-1031"
-person = "Daniell"
-fte = 0.6
-
-[[assignments]]
-epic = "DPE-1101"
-person = "Karthi"
-fte = 1.0
-
+# The slug after owner: must match a person's `alias` in [[people]] (which
+# defaults to a slug of their name, e.g. "Ana Souza" -> "ana-souza").
+#
+# An epic with any owner: label is FACT — the tool schedules exactly those people.
+# An epic with none is open backlog, and the tool suggests an owner (`./dpe suggest`).
+# `./dpe validate` flags owner labels that don't cover the epic's skills, and
+# anyone owning more than 100% across all their epics.
+#
 # ---------------------------------------------------------------------------
 # Jira Cloud API access (REST v3).
 #

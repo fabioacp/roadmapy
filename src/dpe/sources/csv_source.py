@@ -45,6 +45,16 @@ def _first(row: dict[str, list[str]], column: str | None) -> str | None:
     return values[0] if values else None
 
 
+def _labels(row: dict[str, list[str]], column: str) -> list[str]:
+    """Labels come either as repeated columns (raw Jira export) or one
+    space-joined cell (after `dpe clean`). Jira labels never contain spaces, so
+    splitting each cell on whitespace handles both cases."""
+    out: list[str] = []
+    for cell in row.get(column, []):
+        out.extend(cell.split())
+    return out
+
+
 def missing_columns(cfg: Config, header: list[str]) -> list[str]:
     return [
         f"{name} -> {column!r}"
@@ -80,7 +90,7 @@ def fetch(cfg: Config) -> list[RawIssue]:
                 assignee=_first(row, col.get("assignee")),
                 priority=_first(row, col.get("priority")) or "",
                 estimate=_first(row, col.get("estimate")),
-                labels=row.get(col.get("labels", ""), []),
+                labels=_labels(row, col.get("labels", "")),
                 due=_first(row, col.get("due")),
                 origin=f"row {line_no} of {path.name}",
             )

@@ -34,6 +34,14 @@ class RawIssue:
 
 
 @dataclass
+class Owner:
+    """One person declared on an epic via an owner: label, with their FTE."""
+
+    person: str  # resolved roster name
+    fte: float   # 0..1, share of that person's day on this epic; default 1.0
+
+
+@dataclass
 class Epic:
     key: str
     summary: str
@@ -45,6 +53,7 @@ class Epic:
     skills: set[str]
     min_seniority: str | None
     due: date | None
+    owners: list[Owner] = field(default_factory=list)  # empty = open backlog
     labels: list[str] = field(default_factory=list)
     priority_forced: bool = False   # came from [priority] in the config, not Jira
     jira_priority: str = ""         # what Jira said, before the override
@@ -52,6 +61,10 @@ class Epic:
     @property
     def label(self) -> str:
         return f"{self.key} — {self.summary}"
+
+    @property
+    def owned(self) -> bool:
+        return bool(self.owners)
 
 
 _DATE_FORMATS = ("%Y-%m-%d", "%d/%b/%y", "%d/%b/%y %I:%M %p", "%d/%m/%Y", "%m/%d/%Y")
@@ -122,6 +135,8 @@ def normalize(cfg: Config, raw: RawIssue) -> Epic | None:
     if forced is not None and forced != priority:
         priority = forced
 
+    owners = _parse_owners(cfg, raw, where)
+
     assignee = raw.assignee
     if assignee and cfg.person(assignee) is None:
         assignee = None  # person outside the roster: treat as unassigned
@@ -138,9 +153,48 @@ def normalize(cfg: Config, raw: RawIssue) -> Epic | None:
         estimate_missing=estimate_missing,
         skills=skills,
         min_seniority=min_seniority,
+        owners=owners,
         due=parse_jira_date(raw.due) if raw.due else None,
         labels=list(raw.labels),
     )
+
+
+def _parse_owners(cfg: Config, raw: RawIssue, where: str) -> list[Owner]:
+    """Read owner:<alias>[:<pct>] labels into a de-duplicated list of Owners.
+
+    An epic with one or more owner labels is a fact — the tool schedules exactly
+    those people. Multiple labels mean shared ownership. The trailing :pct is the
+    FTE (owner:ana-souza:60 = 60%); no pct means 100%.
+    """
+    prefix = cfg.jira.owner_label_prefix
+    owners: list[Owner] = []
+    seen: set[str] = set()
+    for lb in raw.labels:
+        if not lb.lower().startswith(prefix.lower()):
+            continue
+        body = lb[len(prefix):].strip()
+        parts = body.rsplit(":", 1)
+        if len(parts) == 2 and parts[1].isdigit():
+            alias, pct = parts[0].strip().lower(), int(parts[1])
+        else:
+            alias, pct = body.lower(), 100
+        if not 0 < pct <= 100:
+            raise JiraError(f"{where}: label {lb!r} has FTE {pct} — must be 1..100")
+        person = cfg.person_by_alias(alias)
+        if person is None:
+            known = ", ".join(sorted(p.alias for p in cfg.people))
+            raise JiraError(
+                f"{where}: owner label {lb!r} points at {alias!r}, which matches "
+                f"no one in [[people]] (known aliases: {known})"
+            )
+        if person.name in seen:
+            raise JiraError(
+                f"{where}: {person.name} appears twice in owner labels — "
+                f"one owner label per person per epic"
+            )
+        seen.add(person.name)
+        owners.append(Owner(person=person.name, fte=pct / 100.0))
+    return owners
 
 
 def normalize_all(cfg: Config, raws: list[RawIssue]) -> list[Epic]:

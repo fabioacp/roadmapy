@@ -1,10 +1,10 @@
 {
-  "_comment": "Fixture in the shape of GET /rest/api/3/search/jql (Jira Cloud REST v3). Used by StubTransport. Generated from data/epics.csv so that source=csv and source=api produce the same roadmap.",
+  "_comment": "Fixture in the shape of GET /rest/api/3/search/jql (Jira Cloud REST v3). Used by StubTransport. Same epics as the raw CSV so source=csv and source=api match.",
   "issues": [
     {
       "id": "10000",
-      "key": "DPE-101",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-101",
+      "key": "DPE-1011",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1011",
       "fields": {
         "summary": "Migrate EKS clusters to 1.31",
         "status": {
@@ -14,8 +14,8 @@
           }
         },
         "assignee": {
-          "displayName": "Ana Souza",
-          "emailAddress": "ana.souza@yourcompany.com",
+          "displayName": "Alex",
+          "emailAddress": "alex@yourcompany.com",
           "accountId": "5f00000000000000000000000000"
         },
         "priority": {
@@ -24,7 +24,8 @@
         "labels": [
           "skill:kubernetes",
           "skill:terraform",
-          "min:senior"
+          "min:senior",
+          "owner:alex"
         ],
         "duedate": "2026-09-30",
         "customfield_10016": 13.0
@@ -32,8 +33,8 @@
     },
     {
       "id": "10001",
-      "key": "DPE-102",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-102",
+      "key": "DPE-1021",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1021",
       "fields": {
         "summary": "Golden path for Go services in Backstage",
         "status": {
@@ -56,8 +57,8 @@
     },
     {
       "id": "10002",
-      "key": "DPE-103",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-103",
+      "key": "DPE-1031",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1031",
       "fields": {
         "summary": "Centralise metrics and traces in OTel Collector",
         "status": {
@@ -67,8 +68,8 @@
           }
         },
         "assignee": {
-          "displayName": "Bruno Lima",
-          "emailAddress": "bruno.lima@yourcompany.com",
+          "displayName": "Daniell",
+          "emailAddress": "daniell@yourcompany.com",
           "accountId": "5f00000000000000000000000002"
         },
         "priority": {
@@ -76,7 +77,8 @@
         },
         "labels": [
           "skill:observability",
-          "skill:kubernetes"
+          "skill:kubernetes",
+          "owner:daniell:60"
         ],
         "duedate": null,
         "customfield_10016": 13.0
@@ -84,8 +86,8 @@
     },
     {
       "id": "10003",
-      "key": "DPE-104",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-104",
+      "key": "DPE-1041",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1041",
       "fields": {
         "summary": "Self-service S3 buckets via Terraform module",
         "status": {
@@ -108,8 +110,8 @@
     },
     {
       "id": "10004",
-      "key": "DPE-105",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-105",
+      "key": "DPE-1051",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1051",
       "fields": {
         "summary": "Standardise CI pipelines into a reusable template",
         "status": {
@@ -131,8 +133,8 @@
     },
     {
       "id": "10005",
-      "key": "DPE-106",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-106",
+      "key": "DPE-1061",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1061",
       "fields": {
         "summary": "Automatic secret rotation in Vault",
         "status": {
@@ -156,8 +158,8 @@
     },
     {
       "id": "10006",
-      "key": "DPE-107",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-107",
+      "key": "DPE-1071",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1071",
       "fields": {
         "summary": "Cost dashboard per squad",
         "status": {
@@ -180,8 +182,8 @@
     },
     {
       "id": "10007",
-      "key": "DPE-108",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-108",
+      "key": "DPE-1081",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1081",
       "fields": {
         "summary": "Rust build runtime for the monorepo",
         "status": {
@@ -203,8 +205,8 @@
     },
     {
       "id": "10008",
-      "key": "DPE-109",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-109",
+      "key": "DPE-1091",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1091",
       "fields": {
         "summary": "Ephemeral PR environments",
         "status": {
@@ -219,7 +221,9 @@
         },
         "labels": [
           "skill:kubernetes",
-          "skill:ci-cd"
+          "skill:ci-cd",
+          "owner:alex:50",
+          "owner:daniell:50"
         ],
         "duedate": "2026-12-15",
         "customfield_10016": 21.0
@@ -227,8 +231,8 @@
     },
     {
       "id": "10009",
-      "key": "DPE-110",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-110",
+      "key": "DPE-1101",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1101",
       "fields": {
         "summary": "Autoscaling for CI runners",
         "status": {
@@ -238,8 +242,8 @@
           }
         },
         "assignee": {
-          "displayName": "Diego Alves",
-          "emailAddress": "diego.alves@yourcompany.com",
+          "displayName": "Karthi",
+          "emailAddress": "karthi@yourcompany.com",
           "accountId": "5f00000000000000000000000009"
         },
         "priority": {
@@ -247,7 +251,8 @@
         },
         "labels": [
           "skill:ci-cd",
-          "skill:go"
+          "skill:go",
+          "owner:karthi"
         ],
         "duedate": null,
         "customfield_10016": 8.0
@@ -255,8 +260,8 @@
     },
     {
       "id": "10010",
-      "key": "DPE-111",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-111",
+      "key": "DPE-1111",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1111",
       "fields": {
         "summary": "Automated repository onboarding",
         "status": {
@@ -279,8 +284,8 @@
     },
     {
       "id": "10011",
-      "key": "DPE-112",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-112",
+      "key": "DPE-1121",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1121",
       "fields": {
         "summary": "SLOs and alerting as code",
         "status": {
@@ -303,8 +308,8 @@
     },
     {
       "id": "10012",
-      "key": "DPE-113",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-113",
+      "key": "DPE-1131",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1131",
       "fields": {
         "summary": "Decommission legacy Jenkins",
         "status": {
@@ -314,8 +319,8 @@
           }
         },
         "assignee": {
-          "displayName": "Bruno Lima",
-          "emailAddress": "bruno.lima@yourcompany.com",
+          "displayName": "Daniell",
+          "emailAddress": "daniell@yourcompany.com",
           "accountId": "5f00000000000000000000000012"
         },
         "priority": {
@@ -330,8 +335,8 @@
     },
     {
       "id": "10013",
-      "key": "DPE-114",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-114",
+      "key": "DPE-1141",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1141",
       "fields": {
         "summary": "Service catalogue in Backstage",
         "status": {

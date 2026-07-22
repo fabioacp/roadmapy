@@ -1,15 +1,15 @@
-Issue key,Issue Type,Summary,Status,Assignee,Priority,Custom field (Story Points),Labels,Labels,Labels,Due date
-DPE-1011,Epic,Migrate EKS clusters to 1.31,In Progress,Ana Souza,Highest,13,skill:kubernetes,skill:terraform,min:senior,2026-09-30
-DPE-1021,Epic,Golden path for Go services in Backstage,To Do,,High,21,skill:backstage,skill:go,,2026-11-30
-DPE-1031,Epic,Centralise metrics and traces in OTel Collector,To Do,Bruno Lima,High,13,skill:observability,skill:kubernetes,,
-DPE-1041,Epic,Self-service S3 buckets via Terraform module,To Do,,Medium,8,skill:terraform,skill:aws,,2026-09-15
-DPE-1051,Epic,Standardise CI pipelines into a reusable template,To Do,,Medium,13,skill:ci-cd,,,
-DPE-1061,Epic,Automatic secret rotation in Vault,To Do,,High,8,skill:terraform,skill:aws,min:senior,2026-10-31
-DPE-1071,Epic,Cost dashboard per squad,To Do,,Low,5,skill:python,skill:aws,,
-DPE-1081,Epic,Rust build runtime for the monorepo,To Do,,Medium,21,skill:rust,,,
-DPE-1091,Epic,Ephemeral PR environments,To Do,,High,21,skill:kubernetes,skill:ci-cd,,2026-12-15
-DPE-1101,Epic,Autoscaling for CI runners,To Do,Diego Alves,Medium,8,skill:ci-cd,skill:go,,
-DPE-1111,Epic,Automated repository onboarding,To Do,,Low,,skill:python,skill:ci-cd,,
-DPE-1121,Epic,SLOs and alerting as code,To Do,,Medium,13,skill:observability,skill:python,,
-DPE-1131,Epic,Decommission legacy Jenkins,Done,Bruno Lima,Medium,8,skill:ci-cd,,,
-DPE-1141,Epic,Service catalogue in Backstage,To Do,,High,13,skill:backstage,,,2026-10-15
+Issue key,Summary,Status,Assignee,Priority,Custom field (Story Points),Labels,Due date
+DPE-1011,Migrate EKS clusters to 1.31,In Progress,Alex,Highest,13,skill:kubernetes skill:terraform min:senior owner:alex,2026-09-30
+DPE-1021,Golden path for Go services in Backstage,To Do,,High,21,skill:backstage skill:go,2026-11-30
+DPE-1031,Centralise metrics and traces in OTel Collector,To Do,Daniell,High,13,skill:observability skill:kubernetes owner:daniell:60,
+DPE-1041,Self-service S3 buckets via Terraform module,To Do,,Medium,8,skill:terraform skill:aws,2026-09-15
+DPE-1051,Standardise CI pipelines into a reusable template,To Do,,Medium,13,skill:ci-cd,
+DPE-1061,Automatic secret rotation in Vault,To Do,,High,8,skill:terraform skill:aws min:senior,2026-10-31
+DPE-1071,Cost dashboard per squad,To Do,,Low,5,skill:python skill:aws,
+DPE-1081,Rust build runtime for the monorepo,To Do,,Medium,21,skill:rust,
+DPE-1091,Ephemeral PR environments,To Do,,High,21,skill:kubernetes skill:ci-cd owner:alex:50 owner:daniell:50,2026-12-15
+DPE-1101,Autoscaling for CI runners,To Do,Karthi,Medium,8,skill:ci-cd skill:go owner:karthi,
+DPE-1111,Automated repository onboarding,To Do,,Low,,skill:python skill:ci-cd,
+DPE-1121,SLOs and alerting as code,To Do,,Medium,13,skill:observability skill:python,
+DPE-1131,Decommission legacy Jenkins,Done,Daniell,Medium,8,skill:ci-cd,
+DPE-1141,Service catalogue in Backstage,To Do,,High,13,skill:backstage,2026-10-15

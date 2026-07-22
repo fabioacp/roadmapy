@@ -11,7 +11,7 @@ from datetime import date, timedelta
 
 from .config import Config
 from .jira import Epic, unknown_skills
-from .scheduler import COMMITTED, Assignment, Ledger, monthly_utilization
+from .scheduler import COMMITTED, Assignment, Ledger, by_epic, monthly_utilization
 
 # Validated categorical palette (dataviz): fixed order, never recycled.
 SERIES_LIGHT = ["#2a78d6", "#008300", "#e87ba4", "#eda100", "#1baf7a", "#eb6834", "#4a3aa7", "#e34948"]
@@ -244,8 +244,10 @@ def render(
     today: date,
     months: int,
 ) -> str:
-    staffed = [a for a in assignments if a.staffed]
-    unstaffed = [a for a in assignments if not a.staffed]
+    staffed = [a for a in assignments if a.staffed]          # per-owner rows (Gantt)
+    plans = by_epic(assignments)                             # one per epic (counts/tables)
+    staffed_plans = [p for p in plans if p.staffed]
+    unstaffed = [p for p in plans if not p.staffed]
     color_of = {p.name: f"var(--series-{(i % 8) + 1})" for i, p in enumerate(cfg.people)}
     # Slots 3,4,5 (light) fall below 3:1 — that is why every bar carries a direct
     # label and the full table exists below (dataviz relief rule).
@@ -262,22 +264,22 @@ def render(
     parts: list[str] = []
     add = parts.append
 
-    committed = sum(a.epic.estimate_days for a in staffed)
-    no_estimate = [a for a in assignments if a.epic.estimate_missing]
-    last_end = max((a.end for a in staffed), default=today)
+    committed = sum(p.epic.estimate_days for p in staffed_plans)
+    no_estimate = [p for p in plans if p.epic.estimate_missing]
+    last_end = max((p.end for p in staffed_plans), default=today)
+    n_owned = sum(1 for e in epics if e.owned)
 
     add(f"<h1>{E(cfg.team_name)} — Roadmap &amp; Capacity</h1>")
     add(
         f'<p class="sub">Generated {today:%d/%m/%Y} · {len(cfg.people)} people · '
-        f'{cfg.overhead_pct:.0%} overhead · {len(cfg.commitments)} epic(s) with a declared '
-        f'owner in [[assignments]]</p>'
+        f'{cfg.overhead_pct:.0%} overhead · {n_owned} epic(s) with an owner: label in Jira</p>'
     )
 
     add('<div class="tiles">')
-    n_fact = sum(1 for a in staffed if a.committed)
-    n_suggested = len(staffed) - n_fact
+    n_fact = sum(1 for p in staffed_plans if p.committed)
+    n_suggested = len(staffed_plans) - n_fact
     add(f'<div class="tile"><div class="k">Declared owner</div><div class="v">{n_fact}</div>'
-        f'<div class="n">from [[assignments]] — fact</div></div>')
+        f'<div class="n">owner: label — fact</div></div>')
     add(f'<div class="tile"><div class="k">Suggested by the tool</div>'
         f'<div class="v">{n_suggested}</div>'
         f'<div class="n">of {len(epics)} epics in the backlog</div></div>')
@@ -331,14 +333,19 @@ def render(
                         f"<br>Due {a.epic.due:%d/%m/%Y} — "
                         f"{str((a.end - a.epic.due).days) + 'd LATE' if late else 'on time'}"
                     )
-                origin = ("✓ declared in [[assignments]]" if a.committed
+                origin = ("✓ owner: label in Jira" if a.committed
                           else "◇ tool suggestion — nobody assigned yet")
                 warn_note = f"<br>⚠ {E(a.warning)}" if a.warning else ""
+                shared_note = ""
+                if a.co_owners:
+                    others = ", ".join(f"{n} ({f:.0%})" for n, f in a.co_owners)
+                    shared_note = f"<br>shared with {E(others)}"
                 tip = (
                     f"<b>{E(a.epic.key)}</b>{E(a.epic.summary)}<br>"
-                    f"{E(person.name)} ({E(person.seniority)}) · {a.fte:.0%} FTE<br>"
-                    f"{a.start:%d/%m/%Y} → {a.end:%d/%m/%Y} · {a.epic.estimate_days:.1f} senior-days"
-                    f"{due_note}<br>{origin}{warn_note}"
+                    f"{E(person.name)} ({E(person.seniority)}) · {a.fte:.0%} FTE"
+                    f"{shared_note}<br>"
+                    f"{a.start:%d/%m/%Y} → {a.end:%d/%m/%Y} · epic total {a.epic.estimate_days:.1f} "
+                    f"senior-days{due_note}<br>{origin}{warn_note}"
                 )
                 classes = ink + ("" if a.committed else " suggested")
                 mark = '<span class="warn-mark">⚠</span>' if a.warning else ""
@@ -361,51 +368,57 @@ def render(
         add(f'<div><span class="swatch" style="background:{color_of[person.name]}"></span>'
             f'{E(person.name)}</div>')
     add('<div style="margin-left:auto"><span class="swatch" '
-        'style="background:var(--muted)"></span>solid = declared (fact)</div>')
+        'style="background:var(--muted)"></span>solid = owner: label (fact)</div>')
     add('<div><span class="swatch suggested" style="background-color:var(--muted);'
         'background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.5) 0 3px,'
         'rgba(255,255,255,0) 3px 6px)"></span>hatched = suggestion</div>')
     add("</div></div></div></section>")
 
+    def owner_dots(plan) -> str:
+        return "".join(
+            f'<span class="dot" style="background:{color_of[a.person.name]}"></span>'
+            for a in plan.owners
+        )
+
     # ---- Quarter view ----
-    buckets: dict[str, list[Assignment]] = {}
-    for a in sorted(staffed, key=lambda x: x.end):
-        q = cfg.fiscal_quarter(a.end)
-        buckets.setdefault(q, []).append(a)
+    buckets: dict[str, list] = {}
+    for p in sorted(staffed_plans, key=lambda x: x.end):
+        buckets.setdefault(cfg.fiscal_quarter(p.end), []).append(p)
 
     add('<section><h2>By quarter</h2>')
     add('<p class="sub" style="margin-bottom:16px">The same plan grouped by delivery '
         'quarter — the view for a planning conversation.</p>')
     add('<div class="quarters">')
     for q, items in buckets.items():
-        effort = sum(a.epic.estimate_days for a in items)
-        late_count = sum(1 for a in items if a.epic.due and a.end > a.epic.due)
+        effort = sum(p.epic.estimate_days for p in items)
+        late_count = sum(1 for p in items if p.epic.due and p.end > p.epic.due)
         add('<div class="qcard">')
         add(f'<div class="qhead"><b>{E(q)}</b>'
             f'<span>{len(items)} epic(s) · {effort:.0f} senior-days</span></div>')
         if late_count:
             add(f'<div class="crit" style="font-size:11px;margin-bottom:8px">'
                 f'⚠ {late_count} past deadline</div>')
-        for a in items:
-            marker = "▪" if a.committed else "◇"
-            tip = (f"<b>{E(a.epic.key)}</b>{E(a.epic.summary)}<br>"
-                   f"{E(a.person.name)} · delivers {a.end:%d/%m/%Y}")
+        for p in items:
+            marker = "▪" if p.committed else "◇"
+            who = ", ".join(p.owner_names)
+            tip = (f"<b>{E(p.epic.key)}</b>{E(p.epic.summary)}<br>"
+                   f"{E(who)} · delivers {p.end:%d/%m/%Y}")
             add(f'<div class="qitem" data-tip="{E(tip)}">'
-                f'<span class="dot" style="background:{color_of[a.person.name]}"></span>'
-                f'<span class="qkey">{marker} {E(a.epic.key)}</span>'
-                f'<span class="qsum">{E(a.epic.summary[:44])}</span>'
-                f'<span class="qwhen">{a.end:%d/%m}</span></div>')
+                f'{owner_dots(p)}'
+                f'<span class="qkey">{marker} {E(p.epic.key)}</span>'
+                f'<span class="qsum">{E(p.epic.summary[:44])}</span>'
+                f'<span class="qwhen">{p.end:%d/%m}</span></div>')
         add("</div>")
     if unstaffed:
         add('<div class="qcard nodate"><div class="qhead"><b>No date</b>'
             f'<span>{len(unstaffed)} epic(s) with nobody eligible</span></div>')
-        for a in unstaffed:
-            add(f'<div class="qitem"><span class="qkey crit">✗ {E(a.epic.key)}</span>'
-                f'<span class="qsum">{E(a.epic.summary[:44])}</span></div>')
+        for p in unstaffed:
+            add(f'<div class="qitem"><span class="qkey crit">✗ {E(p.epic.key)}</span>'
+                f'<span class="qsum">{E(p.epic.summary[:44])}</span></div>')
         add("</div>")
     add("</div>")
     add('<p class="sub" style="margin:14px 0 0;font-size:12px">'
-        '▪ declared in [[assignments]] &nbsp;·&nbsp; ◇ tool suggestion</p>')
+        '▪ owner: label in Jira &nbsp;·&nbsp; ◇ tool suggestion</p>')
     add("</section>")
 
     # ---- Utilisation heatmap ----
@@ -441,62 +454,70 @@ def render(
     add("</tbody></table></div></section>")
 
     # ---- Suggestions: epics with no declared owner ----
-    suggested_items = [a for a in staffed if not a.committed]
+    suggested_items = [p for p in staffed_plans if not p.committed]
     if suggested_items:
         add('<section><h2>Unassigned epics — who would take them and when</h2>')
-        add('<p class="sub" style="margin-bottom:14px">None of these are in '
-            '<code>[[assignments]]</code>. The tool proposes the owner by the first free '
-            'window among those who have the skill. To make it a commitment, declare it '
-            'in the config.</p>')
+        add('<p class="sub" style="margin-bottom:14px">None of these carry an '
+            '<code>owner:</code> label in Jira. The tool proposes the owner by the first '
+            'free window among those who have the skill. To make it a commitment, add the '
+            'label in Jira.</p>')
         add('<div class="tw"><table><thead><tr><th>Epic</th><th>Summary</th>'
             "<th>Suggestion</th><th class='num'>Wait</th><th>Starts</th><th>Delivers</th>"
             "<th>Alternatives</th></tr></thead><tbody>")
-        for a in sorted(suggested_items, key=lambda x: x.start):
-            wait_days = (a.start - today).days
+        for p in sorted(suggested_items, key=lambda x: x.start):
+            person = p.owners[0].person
+            wait_days = (p.start - today).days
             tone = "ok" if wait_days == 0 else ("warn" if wait_days <= 30 else "crit")
             label_text = "today" if wait_days == 0 else f"{wait_days}d"
-            alts = ", ".join(f"{o.person.name} ({o.start:%d/%m})" for o in a.alternatives) or "—"
-            add(f"<tr><td>{E(a.epic.key)}</td><td>{E(a.epic.summary)}</td>"
-                f'<td>{swatch_for(color_of, a.person)}{E(a.person.name)} '
-                f'<span class="pill">{E(a.person.seniority)}</span></td>'
+            alts = ", ".join(f"{o.person.name} ({o.start:%d/%m})"
+                             for o in p.alternatives) or "—"
+            add(f"<tr><td>{E(p.epic.key)}</td><td>{E(p.epic.summary)}</td>"
+                f'<td>{swatch_for(color_of, person)}{E(person.name)} '
+                f'<span class="pill">{E(person.seniority)}</span></td>'
                 f"<td class='num'><span class=\"{tone}\">{label_text}</span></td>"
-                f"<td>{a.start:%d/%m/%Y}</td><td>{a.end:%d/%m/%Y}</td>"
+                f"<td>{p.start:%d/%m/%Y}</td><td>{p.end:%d/%m/%Y}</td>"
                 f"<td style='color:var(--text-secondary)'>{E(alts)}</td></tr>")
         add("</tbody></table></div></section>")
 
     # ---- Full table (alternative view, required by the relief rule) ----
     add('<section><h2>Detailed allocation</h2>')
-    add('<div class="tw"><table><thead><tr><th>Epic</th><th>Summary</th><th>Owner</th>'
+    add('<div class="tw"><table><thead><tr><th>Epic</th><th>Summary</th><th>Owner(s)</th>'
         "<th>Priority</th><th>Origin</th><th class='num'>FTE</th>"
         "<th>Start</th><th>End</th><th class='num'>Senior-days</th><th>Skills</th>"
         "<th>Deadline</th></tr></thead><tbody>")
-    for a in sorted(staffed, key=lambda x: (x.start, x.end)):
-        swatch = f'<span class="dot" style="background:{color_of[a.person.name]}"></span>'
-        est = f"{a.epic.estimate_days:.1f}"
-        if a.epic.estimate_missing:
+    for p in sorted(staffed_plans, key=lambda x: (x.start, x.end)):
+        owner_cell = ", ".join(
+            f'<span class="dot" style="background:{color_of[a.person.name]}"></span>'
+            f'{E(a.person.name)}' + (f' ({a.fte:.0%})' if a.fte < 0.999 else '')
+            for a in p.owners
+        )
+        fte_cell = f"{sum(a.fte for a in p.owners):.0%}" if len(p.owners) > 1 else \
+            f"{p.owners[0].fte:.0%}"
+        est = f"{p.epic.estimate_days:.1f}"
+        if p.epic.estimate_missing:
             est = f'<span class="warn" title="no estimate in Jira">{est} ?</span>'
-        skills = " ".join(f'<span class="pill">{E(s)}</span>' for s in sorted(a.epic.skills)) or "—"
-        if a.epic.due is None:
+        skills = " ".join(f'<span class="pill">{E(s)}</span>' for s in sorted(p.epic.skills)) or "—"
+        if p.epic.due is None:
             due_cell = '<span style="color:var(--muted)">—</span>'
-        elif a.end > a.epic.due:
-            due_cell = f'<span class="crit">{(a.end - a.epic.due).days}d late</span>'
+        elif p.end > p.epic.due:
+            due_cell = f'<span class="crit">{(p.end - p.epic.due).days}d late</span>'
         else:
             due_cell = f'<span class="ok">on time</span>'
-        if a.committed:
-            origin = '<span class="pill" title="declared in [[assignments]]">✓ fact</span>'
+        if p.committed:
+            origin = '<span class="pill" title="owner: label in Jira">✓ fact</span>'
         else:
             origin = '<span class="pill" title="tool proposal">◇ suggestion</span>'
-        if a.warning:
-            origin += f' <span class="warn" title="{E(a.warning)}">⚠</span>'
-        prio = E(a.epic.priority or "—")
-        if a.epic.priority_forced:
+        if p.warning:
+            origin += f' <span class="warn" title="{E(p.warning)}">⚠</span>'
+        prio = E(p.epic.priority or "—")
+        if p.epic.priority_forced:
             prio = (f'<b title="forced in [priority]; Jira said '
-                    f'{E(a.epic.jira_priority or "nothing")}">{prio}*</b>')
+                    f'{E(p.epic.jira_priority or "nothing")}">{prio}*</b>')
         add(
-            f"<tr><td>{E(a.epic.key)}</td><td>{E(a.epic.summary)}</td>"
-            f"<td>{swatch}{E(a.person.name)}</td><td>{prio}</td><td>{origin}</td>"
-            f"<td class='num'>{a.fte:.0%}</td><td>{a.start:%d/%m/%Y}</td>"
-            f"<td>{a.end:%d/%m/%Y}</td><td class='num'>{est}</td><td>{skills}</td>"
+            f"<tr><td>{E(p.epic.key)}</td><td>{E(p.epic.summary)}</td>"
+            f"<td>{owner_cell}</td><td>{prio}</td><td>{origin}</td>"
+            f"<td class='num'>{fte_cell}</td><td>{p.start:%d/%m/%Y}</td>"
+            f"<td>{p.end:%d/%m/%Y}</td><td class='num'>{est}</td><td>{skills}</td>"
             f"<td>{due_cell}</td></tr>"
         )
     add("</tbody></table></div></section>")
@@ -508,12 +529,12 @@ def render(
             'requirements. This is hiring, training, or scope renegotiation — not a queue.</p>')
         add('<div class="tw"><table><thead><tr><th>Epic</th><th>Summary</th><th>Needs</th>'
             "<th>Reason</th></tr></thead><tbody>")
-        for a in unstaffed:
-            need = " ".join(f'<span class="pill">{E(s)}</span>' for s in sorted(a.epic.skills)) or "—"
-            if a.epic.min_seniority:
-                need += f' <span class="pill">min: {E(a.epic.min_seniority)}</span>'
-            add(f"<tr><td>{E(a.epic.key)}</td><td>{E(a.epic.summary)}</td><td>{need}</td>"
-                f"<td style='color:var(--text-secondary)'>{E(a.reason)}</td></tr>")
+        for p in unstaffed:
+            need = " ".join(f'<span class="pill">{E(s)}</span>' for s in sorted(p.epic.skills)) or "—"
+            if p.epic.min_seniority:
+                need += f' <span class="pill">min: {E(p.epic.min_seniority)}</span>'
+            add(f"<tr><td>{E(p.epic.key)}</td><td>{E(p.epic.summary)}</td><td>{need}</td>"
+                f"<td style='color:var(--text-secondary)'>{E(p.reason)}</td></tr>")
         add("</tbody></table></div></section>")
 
     # ---- Skill coverage ----

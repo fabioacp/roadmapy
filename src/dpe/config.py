@@ -28,26 +28,22 @@ class Absence:
         return self.start <= day <= self.end
 
 
+def slug(text: str) -> str:
+    """Turn 'Ana Souza' into 'ana-souza' — the shape an owner: label needs."""
+    return "-".join(text.lower().split())
+
+
 @dataclass
 class Person:
     name: str
     seniority: str
     skills: set[str]
     fte: float
+    alias: str = ""  # matches owner:<alias> in Jira; defaults to slug(name)
     pto: list[Absence] = field(default_factory=list)
 
     def available_on(self, day: date) -> bool:
         return not any(a.covers(day) for a in self.pto)
-
-
-@dataclass
-class Commitment:
-    """Work that is ALREADY assigned — declared by you, not inferred."""
-
-    epic: str
-    person: str
-    fte: float  # fraction of the person's daily capacity dedicated to this epic
-    note: str = ""
 
 
 @dataclass
@@ -68,12 +64,14 @@ class JiraSpec:
     source: str  # "csv" | "api"
     api: JiraApiSpec
     csv: str
+    raw_csv: str  # the raw Jira export that `dpe clean` reads (file or folder)
     columns: dict[str, str]
     estimate_unit: str
     points_to_days: float
     default_estimate_days: float
     skill_label_prefix: str
     min_seniority_label_prefix: str
+    owner_label_prefix: str
     done_statuses: set[str]
     priority_order: list[str]
 
@@ -94,7 +92,6 @@ class Config:
     default_assignment_fte: float
     fiscal_year_start_month: int
     throughput: dict[str, float]
-    commitments: list[Commitment]
     seniority_order: list[str]
     holidays: set[date]
     people: list[Person]
@@ -111,6 +108,14 @@ class Config:
         lowered = name.strip().lower()
         for p in self.people:
             if p.name.lower() == lowered:
+                return p
+        return None
+
+    def person_by_alias(self, alias: str) -> Person | None:
+        """Resolve an owner: label slug to a roster person."""
+        wanted = alias.strip().lower()
+        for p in self.people:
+            if p.alias == wanted:
                 return p
         return None
 
@@ -161,17 +166,6 @@ class Config:
     def priority_for(self, epic_key: str) -> str | None:
         """Priority you forced in the config, if any."""
         return self.priority_overrides.get(epic_key.strip().upper())
-
-    def commitment_for(self, epic_key: str) -> Commitment | None:
-        upper = epic_key.strip().upper()
-        for c in self.commitments:
-            if c.epic.upper() == upper:
-                return c
-        return None
-
-    def committed_fte(self, person_name: str) -> float:
-        """Sum of FTE already promised for this person. Above 1.0 = overcommitment."""
-        return sum(c.fte for c in self.commitments if c.person == person_name)
 
 
 def load(path: Path) -> Config:
@@ -225,7 +219,8 @@ def load(path: Path) -> Config:
                 raise ConfigError(f"{name}: pto ends ({end}) before it starts ({start})")
             pto.append(Absence(start, end))
         skills = {str(s).strip().lower() for s in entry.get("skills", []) if str(s).strip()}
-        people.append(Person(name, seniority, skills, fte, pto))
+        alias = str(entry.get("alias", "")).strip().lower() or slug(name)
+        people.append(Person(name, seniority, skills, fte, alias, pto))
 
     if not people:
         raise ConfigError("no people in [[people]] — the roadmap would be empty")
@@ -235,6 +230,14 @@ def load(path: Path) -> Config:
     if dupes:
         raise ConfigError(f"duplicate names in [[people]]: {sorted(dupes)}")
 
+    aliases = [p.alias for p in people]
+    alias_dupes = {a for a in aliases if aliases.count(a) > 1}
+    if alias_dupes:
+        raise ConfigError(
+            f"duplicate owner aliases in [[people]]: {sorted(alias_dupes)} — "
+            f"set a unique 'alias' on the clashing people"
+        )
+
     default_fte = float(team.get("default_assignment_fte", 1.0))
     if not 0.0 < default_fte <= 1.0:
         raise ConfigError("[team] default_assignment_fte must be between 0.01 and 1.0")
@@ -242,39 +245,6 @@ def load(path: Path) -> Config:
     fy_start = int(team.get("fiscal_year_start_month", 7))
     if not 1 <= fy_start <= 12:
         raise ConfigError("[team] fiscal_year_start_month must be between 1 and 12")
-
-    commitments: list[Commitment] = []
-    seen_epics: set[str] = set()
-    for idx, entry in enumerate(raw.get("assignments", [])):
-        epic = str(entry.get("epic", "")).strip()
-        who = str(entry.get("person", "")).strip()
-        if not epic:
-            raise ConfigError(f"[[assignments]] #{idx + 1}: field 'epic' is required")
-        if not who:
-            raise ConfigError(f"[[assignments]] {epic}: field 'person' is required")
-
-        match = next((p for p in people if p.name.lower() == who.lower()), None)
-        if match is None:
-            raise ConfigError(
-                f"[[assignments]] {epic}: person {who!r} is not in [[people]] "
-                f"(options: {', '.join(p.name for p in people)})"
-            )
-        if epic.upper() in seen_epics:
-            raise ConfigError(
-                f"[[assignments]] {epic} appears twice — an epic has exactly one owner. "
-                f"To split it across people, break the epic up in Jira."
-            )
-        seen_epics.add(epic.upper())
-
-        c_fte = float(entry.get("fte", default_fte))
-        if not 0.0 < c_fte <= 1.0:
-            raise ConfigError(
-                f"[[assignments]] {epic}: fte must be between 0.01 and 1.0 (got {c_fte})"
-            )
-        commitments.append(
-            Commitment(epic=epic, person=match.name, fte=c_fte,
-                       note=str(entry.get("note", "")).strip())
-        )
 
     jira_raw = raw.get("jira", {})
     unit = str(jira_raw.get("estimate_unit", "points")).lower()
@@ -309,12 +279,14 @@ def load(path: Path) -> Config:
         source=source,
         api=api,
         csv=str(jira_raw.get("csv", "data/epics.csv")),
+        raw_csv=str(jira_raw.get("raw_csv", "data/raw")),
         columns={k: str(v) for k, v in columns.items()},
         estimate_unit=unit,
         points_to_days=float(jira_raw.get("points_to_days", 1.0)),
         default_estimate_days=float(jira_raw.get("default_estimate_days", 10)),
         skill_label_prefix=str(jira_raw.get("skill_label_prefix", "skill:")),
         min_seniority_label_prefix=str(jira_raw.get("min_seniority_label_prefix", "min:")),
+        owner_label_prefix=str(jira_raw.get("owner_label_prefix", "owner:")),
         done_statuses={str(s).lower() for s in jira_raw.get("done_statuses", [])},
         priority_order=[str(p) for p in jira_raw.get("priority_order", [])],
     )
@@ -338,7 +310,6 @@ def load(path: Path) -> Config:
         default_assignment_fte=default_fte,
         fiscal_year_start_month=fy_start,
         throughput=throughput,
-        commitments=commitments,
         seniority_order=seniority_order,
         holidays=holidays,
         people=people,

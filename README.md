@@ -11,8 +11,8 @@ working on what, and answers the two questions that matter:
 > *"A request came in needing Terraform and AWS, 8 points, and it needs a senior.
 > When do we start and when do we deliver?"* → `./dpe estimate`
 
-**The tool separates fact from proposal.** What you declare in `[[assignments]]`
-is fact — it only computes the dates. Every epic outside that list is open
+**The tool separates fact from proposal.** An epic with an `owner:` label in Jira
+is fact — the tool only computes its dates. Every epic without one is open
 backlog, and only then does it propose an owner. The roadmap marks the two
 distinctly, so you never present a suggestion as if it were a commitment.
 
@@ -25,7 +25,8 @@ Pure Python 3.11+. **Zero dependencies** — no `pip install`.
 ```bash
 cd ~/Desktop/facp-claude
 
-./dpe validate                        # always first: checks config + data
+./dpe clean                           # tidy the raw Jira export into data/epics.csv
+./dpe validate                        # checks config + data
 ./dpe suggest                         # unassigned epics + who would take them
 ./dpe roadmap --html out/roadmap.html # the visual report
 ```
@@ -58,14 +59,25 @@ an identical roadmap, so switching sources cannot change the result.
 ./dpe source --source api    # raw issues, for debugging the mapping and JQL
 ```
 
-### `csv` — manual export
+### `csv` — manual export, cleaned by the tool
 
 In the Jira issue search, filter by `type = Epic AND project = DPE`, then
-**Export → Export Excel CSV (all fields)**. Save it as `data/epics.csv`.
+**Export → Export Excel CSV (all fields)**. Drop that raw file (dozens of
+columns, repeated `Labels`) into the folder `[jira] raw_csv` points at — a folder
+of dated exports is fine, the newest wins.
 
-Column names vary per instance — that is why `[jira.columns]` exists. Jira also
-repeats the `Labels` column once per label; the tool handles that (Python's
-stock `csv.DictReader` would **not**).
+Then let the tool tidy it:
+
+```bash
+./dpe clean          # reads the raw export, writes data/epics.csv
+```
+
+`clean` keeps only the columns mapped in `[jira.columns]`, folds the repeated
+`Labels` into one cell, and writes a small stable CSV. Everything downstream
+reads that clean file and never sees Jira's chaos. If the raw export is newer
+than the cleaned file, `validate` and `roadmap` remind you to re-run `clean`.
+
+Column names vary per instance — that is why `[jira.columns]` exists.
 
 ### `api` — Jira Cloud REST v3 *(currently stubbed)*
 
@@ -112,36 +124,39 @@ deprecated by Atlassian; the new one paginates by `nextPageToken`, not `startAt`
 
 ---
 
-## Who is working on what
+## Who is working on what — via Jira labels
 
-This is the part you maintain by hand, in `config/config.toml`:
+Ownership lives entirely in Jira, as `owner:` labels on the epic, next to the
+`skill:` labels the tool already reads. There is no assignment table in the
+config to keep in sync.
 
-```toml
-[[assignments]]
-epic = "DPE-101"          # the Jira key, exactly as it appears there
-person = "Ana Souza"      # must match a name in [[people]]
-fte = 1.0                 # how much OF THIS PERSON goes INTO THIS EPIC
-note = "migration in progress"
+| Label on the epic | Meaning |
+|---|---|
+| `owner:alex` | Alex owns it, 100% dedicated |
+| `owner:daniell:60` | Daniell, 60% of his day (40% free for other work) |
+| `owner:alex:50` `owner:daniell:50` | **shared** — both own it, co-scheduled |
 
-[[assignments]]
-epic = "DPE-103"
-person = "Bruno Lima"
-fte = 0.6                 # 60% of him here, 40% left for something else
-```
+The slug after `owner:` must match a person's `alias` in `[[people]]`, which
+defaults to a slug of their name (`Ana Souza` → `ana-souza`); set an explicit
+`alias` if you need something else.
 
-`fte` is what gives you fine control: `0.5` means the person spends half their
-daily capacity on that epic, leaving the other half free to run another in
-parallel. Add up one person's `fte` values — past `1.0` they are overcommitted
-and `validate` warns you (the work will **stretch out over time**, not happen in
-parallel).
+**Shared ownership is co-scheduled.** When two or three people own one epic, they
+burn its effort together — each contributing their free capacity × FTE per day —
+and finish on the same date. The roadmap shows the epic once, listing all owners.
 
-**A manual assignment is always honoured**, even if the person lacks the required
-skill or minimum seniority. It is your call. But it gets flagged with ⚠ in the
-roadmap and in `validate`, so it does not slip by unnoticed.
+`fte` is fine control: `owner:x:50` spends half that person's day here, leaving
+the rest for another epic. Add up a person's FTE across all their epics — past
+100% they are overcommitted and `validate` warns you (the work **stretches out
+over time**, it does not happen in parallel).
 
-Jira's `Assignee` field **schedules nothing** — the config is the source of truth.
-But `validate` uses Assignee as a hint: if an epic has an owner in Jira and is not
-in `[[assignments]]`, it prints the block ready to paste.
+**An owner label is always honoured**, even if that person (or the group) lacks a
+required skill or the minimum seniority — it is your call. But it gets flagged
+with ⚠ in the roadmap and in `validate`.
+
+An epic with **no** `owner:` label is open backlog: the tool suggests an owner
+(`./dpe suggest`). Jira's `Assignee` field schedules nothing, but `validate` uses
+it as a hint — if an epic has an Assignee and no `owner:` label, it prints the
+label to add.
 
 ---
 
@@ -152,8 +167,8 @@ override in `config/config.toml` using the same scale:
 
 ```toml
 [priority]
-"DPE-114" = "Highest"   # the catalogue became a leadership commitment
-"DPE-105" = "Low"       # can wait, nobody is blocked
+"DPE-1141" = "Highest"   # the catalogue became a leadership commitment
+"DPE-1051" = "Low"       # can wait, nobody is blocked
 ```
 
 Anything not listed keeps its Jira priority. `roadmap` marks forced ones with `*`,
@@ -176,6 +191,12 @@ gets `default_estimate_days` and is flagged in the report — it does not vanish
 
 ## Commands
 
+### `./dpe clean [PATH]`
+Reads the raw Jira export (from `[jira] raw_csv`, or the path you pass), keeps
+only the columns you use, folds the repeated `Labels` into one cell, and writes
+the tidy `data/epics.csv` the rest of the tool reads. Point `raw_csv` at a folder
+and the newest `*.csv` inside wins.
+
 ### `./dpe validate [--source csv|api]`
 Checks config + data source, lists each person's daily capacity, and warns about
 epics with no estimate, epics with no skill, and skills nobody on the team has.
@@ -188,15 +209,15 @@ it — based on skill, seniority, and first free window — and says how many da
 of waiting until that person can start, plus the alternatives.
 
 ```
-EPIC     SUMMARY                    SUGGESTION              WAIT  STARTS    DELIVERS
-DPE-104  Self-service S3 buckets    Carla Nunes (mid)         0d  21/07/26  24/08/26
-DPE-107  Cost dashboard per squad   Carla Nunes (mid)        34d  24/08/26  14/09/26
-DPE-102  Golden path for Go         Diego Alves (mid)       149d  17/12/26  19/05/27
+EPIC      SUMMARY                    SUGGESTION           WAIT  STARTS    DELIVERS
+DPE-1041  Self-service S3 buckets    Oscar (mid)            0d  22/07/26  25/08/26
+DPE-1071  Cost dashboard per squad   Oscar (mid)           34d  25/08/26  15/09/26
+DPE-1141  Service catalogue          Karthi (mid)          56d  16/09/26  18/12/26
 ```
 
 Suggestions compete with each other for the capacity left over after committed
 work — which is why the plan is coherent, not a list of conflicting optimistic
-dates. At the end it prints the `[[assignments]]` block ready to paste.
+dates. At the end it prints the `owner:` label to add in Jira.
 
 ### `./dpe roadmap [--view V] [--strategy S] [--html FILE]`
 Allocates every open epic and prints the roadmap.
@@ -227,8 +248,7 @@ Runs the three strategies side by side and shows what each choice costs:
 | `quick-wins` | smallest epics first — drains the queue faster |
 
 Compares end date, late epics, days late, average wait, and first delivery. The
-`[[assignments]]` work is identical in all three — only the open backlog order
-changes.
+owned work is identical in all three — only the open backlog order changes.
 
 **When all three end on the same date**, the command says so and points at the
 critical path. It means reordering will not help: the bottleneck is capacity or
@@ -238,9 +258,9 @@ skill, not priority. Real output:
 ⓘ All three strategies end on the SAME date. Reordering the backlog
   will not help — the bottleneck is capacity, not order.
 
-  Critical path: DPE-102 (Golden path for Go services in Backstage),
-  which can only go to Diego Alves (60% FTE).
-  Skill with no backup: backstage — only Diego Alves has it.
+  Critical path: DPE-1021 (Golden path for Go services in Backstage),
+  which can only go to Karthi (60% FTE).
+  Skill with no backup: backstage — only Karthi has it.
 ```
 
 `--detail` shows the full order for each strategy.
@@ -287,12 +307,13 @@ Both work before or after the subcommand.
 python3 -m unittest discover tests
 ```
 
-41 tests, stdlib only. They cover CSV↔API parity, API pagination, credential
-errors, label/estimate normalisation, the precedence of `[[assignments]]` and
-`[priority]` over Jira, the three strategies (none loses or invents an epic, none
-touches committed work), the three views, and the scheduler's invariants (nobody
-works during time off; a suggestion never ignores skill or seniority; daily
-capacity is never exceeded, not even with FTE summing above 100%).
+43 tests, stdlib only. They cover CSV↔API parity, API pagination, credential
+errors, label/estimate normalisation, `owner:` label parsing (single, partial
+FTE, shared, unknown alias), shared co-scheduling (all owners finish together,
+effort split not duplicated), `[priority]` overrides, the three strategies (none
+loses or invents an epic, none changes ownership), the three views, the `clean`
+command, and the scheduler's invariants (nobody works during time off; a
+suggestion never ignores skill or seniority; daily capacity is never exceeded).
 
 ---
 
@@ -309,20 +330,23 @@ daily_capacity(person) = fte × (1 − overhead_pct) × throughput[seniority]
   most often — be honest.
 - **`throughput`** converts seniority into output. A `mid` at 0.7 takes 1.43 days
   to deliver 1 senior-day. It is not a value judgement, it is calibration.
-- **`fte` per assignment** is how much of a person goes into each epic. It is what
-  controls parallelism: two epics at `0.5` run together; one at `1.0` is full focus.
+- **`fte` on an owner label** is how much of a person goes into each epic. It is
+  what controls parallelism: two epics at `0.5` run together; one at `1.0` is full
+  focus. It is also what shared ownership splits across co-owners.
 - **`fiscal_year_start_month`** (default 7 = July) sets where Q1 begins. The FY is
   named after the year it ends in, so August 2026 falls in Q1 FY27. Set it to 1
   for calendar quarters.
 
-The calculation has two phases. First the **committed** work: each epic in
-`[[assignments]]` consumes the declared person's capacity at the declared FTE.
-Then the **suggestions**: the remaining epics, in whatever order the chosen
-strategy dictates, compete for what is left; each goes to the eligible person who
-**finishes earliest**. Time off and holidays drop out of the affected person's
-calendar.
+The calculation has two phases. First the **owned** work: each epic with `owner:`
+labels consumes the declared people's capacity at the declared FTE; shared epics
+are co-scheduled so their owners finish together. Then the **suggestions**: the
+remaining epics, in whatever order the chosen strategy dictates, compete for what
+is left; each goes to the eligible person who **finishes earliest**. Time off and
+holidays drop out of the affected person's calendar.
 
-The strategy only reorders the open backlog — it never touches what you declared.
+The strategy reorders the backlog and can shift an owned epic's **dates** (when
+one person owns several, something has to run first) — but it never changes
+**who** owns what.
 
 ### Limits you should know about
 
@@ -344,17 +368,19 @@ The strategy only reorders the open backlog — it never touches what you declar
 ## Layout
 
 ```
-config/config.toml             roster, throughput, holidays, priority, assignments
-data/epics.csv                 Jira export (sample included)
+config/config.toml             roster (with aliases), throughput, holidays, priority
+data/raw/                      drop your raw Jira exports here
+data/epics.csv                 the cleaned file (written by `dpe clean`)
 data/jira_api_stub.json        API fixture, in the exact shape of the real endpoint
 src/dpe/config.py              loads and validates the config
-src/dpe/jira.py                Epic model + shared normalisation
+src/dpe/jira.py                Epic/Owner model + shared normalisation
+src/dpe/clean.py               raw export -> tidy CSV
 src/dpe/sources/__init__.py    source factory
-src/dpe/sources/csv_source.py  CSV export (handles repeated columns)
+src/dpe/sources/csv_source.py  CSV reader (repeated or folded Labels)
 src/dpe/sources/api_source.py  REST v3 client + StubTransport/HttpTransport
-src/dpe/scheduler.py           capacity ledger, allocation, simulation
+src/dpe/scheduler.py           capacity ledger, co-scheduling, simulation
 src/dpe/report.py              HTML report
 src/dpe/cli.py                 commands
-tests/test_sources.py          41 tests
+tests/test_sources.py          43 tests
 ./dpe                          shortcut to run without installing
 ```

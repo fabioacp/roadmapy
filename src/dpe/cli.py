@@ -7,10 +7,11 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
+from . import clean as clean_mod
 from . import report, sources
 from .config import Config, ConfigError, load
 from .jira import Epic, JiraError, normalize_all, unknown_skills
-from .scheduler import (COMMITTED, DEFAULT_STRATEGY, STRATEGIES, measure,
+from .scheduler import (COMMITTED, DEFAULT_STRATEGY, STRATEGIES, by_epic, measure,
                         monthly_utilization, schedule, simulate)
 from .sources import csv_source
 
@@ -69,15 +70,28 @@ def _prio_cell(epic) -> str:
     return (epic.priority or "—") + ("*" if epic.priority_forced else "")
 
 
+LEGEND = "\n      ▪ owner: label in Jira      ◇ tool suggestion"
+
+
+def _who(plan) -> str:
+    """Owner column: names + FTE, so a shared epic shows all of them."""
+    if not plan.owners:
+        return "—"
+    return ", ".join(
+        a.person.name.split()[0] + (f" {a.fte:.0%}" if a.fte < 0.999 else "")
+        for a in plan.owners
+    )
+
+
 def view_person(cfg, assignments, today) -> str:
     """Each person's schedule — who is busy with what."""
     out = []
     for person in cfg.people:
         mine = sorted((a for a in assignments if a.person is person),
                       key=lambda x: (x.start or date.max))
-        load_days = sum(a.epic.estimate_days for a in mine)
+        load_days = sum(a.epic.estimate_days * a.fte for a in mine)
         out.append(f"\n  {person.name}  ({person.seniority}, {person.fte:.0%} FTE)"
-                   f"  —  {len(mine)} epic(s), {load_days:.0f} senior-days")
+                   f"  —  {len(mine)} epic(s), ~{load_days:.0f} senior-days")
         if not mine:
             out.append("      (free)")
         for a in mine:
@@ -85,31 +99,32 @@ def view_person(cfg, assignments, today) -> str:
             late_note = ""
             if a.epic.due and a.end and a.end > a.epic.due:
                 late_note = f"  {(a.end - a.epic.due).days}d LATE"
-            out.append(f"      {marker} {a.epic.key:<9} {a.epic.summary[:38]:<40} "
-                       f"{a.start:%d/%m} → {a.end:%d/%m/%y}  {a.fte:.0%}{late_note}")
-    out.append("\n      ▪ declared in [[assignments]]      ◇ tool suggestion")
+            shared = f"  +{len(a.co_owners)} shared" if a.co_owners else ""
+            out.append(f"      {marker} {a.epic.key:<9} {a.epic.summary[:36]:<38} "
+                       f"{a.start:%d/%m} → {a.end:%d/%m/%y}  {a.fte:.0%}{shared}{late_note}")
+    out.append(LEGEND)
     return "\n".join(out)
 
 
 def view_epic(cfg, assignments, today) -> str:
     """The team's delivery sequence — one row per epic, in delivery order."""
-    staffed = sorted((a for a in assignments if a.staffed and a.end),
-                     key=lambda x: (x.end, x.start))
+    plans = sorted((p for p in by_epic(assignments) if p.staffed and p.end),
+                   key=lambda x: (x.end, x.start))
     rows = []
-    for a in staffed:
+    for p in plans:
         late_note = ""
-        if a.epic.due:
-            late_note = (f"{(a.end - a.epic.due).days}d late" if a.end > a.epic.due
-                      else "on time")
+        if p.epic.due:
+            late_note = (f"{(p.end - p.epic.due).days}d late" if p.end > p.epic.due
+                         else "on time")
         rows.append([
-            a.epic.key,
-            a.epic.summary[:38],
-            _prio_cell(a.epic),
-            "fact" if a.committed else "suggestion",
-            a.person.name.split()[0],
-            f"{a.start:%d/%m/%y}",
-            f"{a.end:%d/%m/%y}",
-            f"{a.epic.estimate_days:.1f}",
+            p.epic.key,
+            p.epic.summary[:34],
+            _prio_cell(p.epic),
+            "fact" if p.committed else "suggestion",
+            _who(p),
+            f"{p.start:%d/%m/%y}",
+            f"{p.end:%d/%m/%y}",
+            f"{p.epic.estimate_days:.1f}",
             late_note,
         ])
     return table(["EPIC", "SUMMARY", "PRIOR.", "ORIGIN", "WHO", "START", "DELIVERS",
@@ -118,28 +133,29 @@ def view_epic(cfg, assignments, today) -> str:
 
 def view_quarter(cfg, assignments, today) -> str:
     """Groups by delivery quarter — the view to bring to leadership."""
-    staffed = [a for a in assignments if a.staffed and a.end]
+    plans = by_epic(assignments)
+    staffed = [p for p in plans if p.staffed and p.end]
     buckets: dict[str, list] = {}
-    for a in sorted(staffed, key=lambda x: x.end):
-        buckets.setdefault(quarter_of(cfg, a.end), []).append(a)
+    for p in sorted(staffed, key=lambda x: x.end):
+        buckets.setdefault(quarter_of(cfg, p.end), []).append(p)
 
     out = []
     for q, items in buckets.items():
-        effort = sum(a.epic.estimate_days for a in items)
-        late_count = sum(1 for a in items if a.epic.due and a.end > a.epic.due)
+        effort = sum(p.epic.estimate_days for p in items)
+        late_count = sum(1 for p in items if p.epic.due and p.end > p.epic.due)
         alert = f"  ⚠ {late_count} past deadline" if late_count else ""
         out.append(f"\n  {q}  —  {len(items)} epic(s), {effort:.0f} senior-days{alert}")
-        for a in items:
-            marker = "▪" if a.committed else "◇"
-            out.append(f"      {marker} {a.epic.key:<9} {a.epic.summary[:40]:<42} "
-                       f"{a.person.name.split()[0]:<8} delivers {a.end:%d/%m}")
+        for p in items:
+            marker = "▪" if p.committed else "◇"
+            out.append(f"      {marker} {p.epic.key:<9} {p.epic.summary[:38]:<40} "
+                       f"{_who(p)[:16]:<16} delivers {p.end:%d/%m}")
 
-    no_date = [a for a in assignments if not a.staffed]
+    no_date = [p for p in plans if not p.staffed]
     if no_date:
         out.append(f"\n  NO DATE  —  {len(no_date)} epic(s) nobody can take")
-        for a in no_date:
-            out.append(f"      ✗ {a.epic.key:<9} {a.epic.summary[:40]}")
-    out.append("\n      ▪ declared in [[assignments]]      ◇ tool suggestion")
+        for p in no_date:
+            out.append(f"      ✗ {p.epic.key:<9} {p.epic.summary[:40]}")
+    out.append(LEGEND)
     return "\n".join(out)
 
 
@@ -165,6 +181,8 @@ def cmd_validate(args) -> int:
 
     if source == "csv":
         path = cfg.resolve(cfg.jira.csv)
+        if clean_mod.is_stale(cfg):
+            print("  ⚠ the raw export is newer than the cleaned CSV — run `./dpe clean`")
         header, rows = csv_source.read_rows(path)
         print(f"✓ CSV read — {len(rows)} rows, {len(set(header))} distinct columns")
         missing = csv_source.missing_columns(cfg, header)
@@ -222,60 +240,62 @@ def cmd_validate(args) -> int:
             print(f"\n⚠ {len(unknown_keys)} key(s) in [priority] that are not in the backlog: "
                   f"{', '.join(sorted(unknown_keys))}")
 
-    _check_assignments(cfg, epics)
+    _check_owners(cfg, epics)
     return 0
 
 
-def _check_assignments(cfg: Config, epics: list[Epic]) -> None:
-    """Checks [[assignments]] against the backlog and against real capacity."""
-    from .scheduler import eligible
+def _check_owners(cfg: Config, epics: list[Epic]) -> None:
+    """Checks owner: labels against skills, seniority, and real capacity."""
+    from .scheduler import _owner_warning
 
-    by_key = {e.key.upper(): e for e in epics}
-    print(f"\n  [[assignments]] — {len(cfg.commitments)} epic(s) with a declared owner")
+    owned = [e for e in epics if e.owned]
+    shared = [e for e in owned if len(e.owners) > 1]
+    print(f"\n  owner labels — {len(owned)} epic(s) with a declared owner"
+          + (f", {len(shared)} shared by more than one person" if shared else ""))
 
-    orphans = [c for c in cfg.commitments if c.epic.upper() not in by_key]
-    if orphans:
-        print(f"\n⚠ {len(orphans)} assignment(s) pointing at an epic not in the backlog "
-              f"(already done, or outside the JQL/CSV):")
-        for c in orphans:
-            print(f"    {c.epic:<10} -> {c.person}  — safe to remove from config.toml")
+    for e in owned:
+        warn = _owner_warning(cfg, e)
+        if warn:
+            who = ", ".join(o.person for o in e.owners)
+            print(f"\n⚠ {e.key} is owned by {who}, but {warn}.")
+            print("    Honoured anyway — it is your call. Fix skills in [[people]] "
+                  "if that data is stale.")
 
-    for c in cfg.commitments:
-        epic = by_key.get(c.epic.upper())
-        person = cfg.person(c.person)
-        if epic is None or person is None:
-            continue
-        fits, why = eligible(cfg, person, epic)
-        if not fits:
-            print(f"\n⚠ {c.epic} is assigned to {c.person}, but {why}.")
-            print(f"    Honoured anyway — it is your call. "
-                  f"Fix the skills in [[people]] if that data is stale.")
-
-    overloaded = [
-        (p.name, cfg.committed_fte(p.name))
-        for p in cfg.people
-        if cfg.committed_fte(p.name) > 1.0 + 1e-9
-    ]
+    # Sum each person's declared FTE across every epic they own.
+    committed: dict[str, float] = {}
+    for e in owned:
+        for o in e.owners:
+            committed[o.person] = committed.get(o.person, 0.0) + o.fte
+    overloaded = sorted((n, t) for n, t in committed.items() if t > 1.0 + 1e-9)
     if overloaded:
-        print("\n⚠ people committed above 100% — the work will stretch out over")
-        print("  time, not happen in parallel:")
+        print("\n⚠ people owning more than 100% FTE — the work stretches out over")
+        print("  time, it does not happen in parallel:")
         for name, total in overloaded:
-            their_epics = [c.epic for c in cfg.commitments if c.person == name]
-            print(f"    {name:<18} {total:.0%}  ({', '.join(their_epics)})")
+            their = [e.key for e in owned if any(o.person == name for o in e.owners)]
+            print(f"    {name:<18} {total:.0%}  ({', '.join(their)})")
 
-    # Jira's Assignee schedules nothing — but it is a useful hint of what to declare.
-    hints = [
-        e for e in epics
-        if e.assignee and cfg.commitment_for(e.key) is None
-    ]
+    # Jira's Assignee schedules nothing — but it hints at a missing owner: label.
+    hints = [e for e in epics if e.assignee and not e.owned]
     if hints:
-        print(f"\n  ⓘ {len(hints)} epic(s) have a Jira Assignee but are not in")
-        print("    [[assignments]]. Jira schedules nothing here — if it is real, declare it:")
+        print(f"\n  ⓘ {len(hints)} epic(s) have a Jira Assignee but no owner: label.")
+        print("    The Assignee schedules nothing — add a label in Jira if it is real:")
         for e in hints:
-            print(f"\n      [[assignments]]")
-            print(f"      epic = \"{e.key}\"")
-            print(f"      person = \"{e.assignee}\"")
-            print(f"      fte = 1.0")
+            p = cfg.person(e.assignee)
+            slug = p.alias if p else "?"
+            print(f"      {e.key:<10} → owner:{slug}")
+
+
+def cmd_clean(args) -> int:
+    """Turn a raw Jira export into the tidy CSV the tool reads."""
+    cfg = load(Path(args.config))
+    raw_path, clean_path, stats = clean_mod.clean(cfg, args.raw)
+
+    print(f"\n  Raw:    {raw_path}  (exported {stats['raw_mtime']:%d/%m/%Y %H:%M})")
+    print(f"  Clean:  {clean_path}")
+    print(f"\n✓ kept {stats['kept_rows']} epic(s), {stats['kept_columns']} columns "
+          f"(dropped {stats['raw_columns'] - stats['kept_columns']} unused columns)")
+    print(f"\n  Now run:  ./dpe roadmap --html out/roadmap.html")
+    return 0
 
 
 def cmd_source(args) -> int:
@@ -311,9 +331,13 @@ def cmd_roadmap(args) -> int:
     today = args.date or date.today()
     assignments, ledgers = schedule(cfg, epics, today, strategy=args.strategy)
 
-    staffed = [a for a in assignments if a.staffed]
-    unstaffed = [a for a in assignments if not a.staffed]
+    plans = by_epic(assignments)
+    staffed = [p for p in plans if p.staffed]
+    unstaffed = [p for p in plans if not p.staffed]
     view_label, render_view = VIEWS[args.view]
+
+    if clean_mod.is_stale(cfg) and (args.source or cfg.jira.source) == "csv":
+        print("⚠ the raw export is newer than the cleaned CSV — run `./dpe clean` first")
 
     print(f"\nRoadmap — {cfg.team_name}   (from {today:%d/%m/%Y})")
     print(f"View: {args.view} ({view_label}) · order: {STRATEGIES[args.strategy]}\n")
@@ -321,16 +345,16 @@ def cmd_roadmap(args) -> int:
 
     if unstaffed and args.view != "quarter":
         print(f"\n⚠ {len(unstaffed)} epic(s) with nobody eligible:")
-        for a in unstaffed:
-            print(f"    {a.epic.key:<10} {a.epic.summary[:40]:<42} {a.reason[:60]}")
+        for p in unstaffed:
+            print(f"    {p.epic.key:<10} {p.epic.summary[:40]:<42} {p.reason[:60]}")
 
     if staffed:
         m = measure(assignments, today, args.strategy)
-        n_fact = sum(1 for a in staffed if a.committed)
-        total = sum(a.epic.estimate_days for a in staffed)
+        n_fact = sum(1 for p in staffed if p.committed)
+        total = sum(p.epic.estimate_days for p in staffed)
         print(f"\n  {len(staffed)} epics · {total:.0f} senior-days · "
               f"backlog clear on {m.makespan:%d/%m/%Y}")
-        print(f"  {n_fact} from [[assignments]] (fact) · {len(staffed) - n_fact} suggested")
+        print(f"  {n_fact} owned via labels (fact) · {len(staffed) - n_fact} suggested")
         if m.late_epics:
             print(f"  ⚠ {m.late_epics} epic(s) miss their deadline, {m.late_days} days late "
                   f"in total — see `./dpe compare`")
@@ -638,6 +662,11 @@ def build_parser() -> argparse.ArgumentParser:
                         help="override [jira] source (csv or api)")
 
     sub = parser.add_subparsers(dest="command", required=True, parser_class=lambda **kw: argparse.ArgumentParser(parents=[common], **kw))
+
+    p = sub.add_parser("clean", help="tidy a raw Jira export into the CSV the tool reads")
+    p.add_argument("raw", nargs="?", default=None,
+                   help="raw export file or folder (default: [jira] raw_csv)")
+    p.set_defaults(func=cmd_clean)
 
     p = sub.add_parser("validate", help="check config + source before anything else")
     p.set_defaults(func=cmd_validate)
