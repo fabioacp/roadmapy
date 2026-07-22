@@ -1,0 +1,356 @@
+{
+  "_comment": "Fixture in the shape of GET /rest/api/3/search/jql (Jira Cloud REST v3). Used by StubTransport. Generated from data/epics.csv so that source=csv and source=api produce the same roadmap.",
+  "issues": [
+    {
+      "id": "10000",
+      "key": "DPE-101",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-101",
+      "fields": {
+        "summary": "Migrate EKS clusters to 1.31",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Ana Souza",
+          "emailAddress": "ana.souza@yourcompany.com",
+          "accountId": "5f00000000000000000000000000"
+        },
+        "priority": {
+          "name": "Highest"
+        },
+        "labels": [
+          "skill:kubernetes",
+          "skill:terraform",
+          "min:senior"
+        ],
+        "duedate": "2026-09-30",
+        "customfield_10016": 13.0
+      }
+    },
+    {
+      "id": "10001",
+      "key": "DPE-102",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-102",
+      "fields": {
+        "summary": "Golden path for Go services in Backstage",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:backstage",
+          "skill:go"
+        ],
+        "duedate": "2026-11-30",
+        "customfield_10016": 21.0
+      }
+    },
+    {
+      "id": "10002",
+      "key": "DPE-103",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-103",
+      "fields": {
+        "summary": "Centralise metrics and traces in OTel Collector",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Bruno Lima",
+          "emailAddress": "bruno.lima@yourcompany.com",
+          "accountId": "5f00000000000000000000000002"
+        },
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:observability",
+          "skill:kubernetes"
+        ],
+        "duedate": null,
+        "customfield_10016": 13.0
+      }
+    },
+    {
+      "id": "10003",
+      "key": "DPE-104",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-104",
+      "fields": {
+        "summary": "Self-service S3 buckets via Terraform module",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:terraform",
+          "skill:aws"
+        ],
+        "duedate": "2026-09-15",
+        "customfield_10016": 8.0
+      }
+    },
+    {
+      "id": "10004",
+      "key": "DPE-105",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-105",
+      "fields": {
+        "summary": "Standardise CI pipelines into a reusable template",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:ci-cd"
+        ],
+        "duedate": null,
+        "customfield_10016": 13.0
+      }
+    },
+    {
+      "id": "10005",
+      "key": "DPE-106",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-106",
+      "fields": {
+        "summary": "Automatic secret rotation in Vault",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:terraform",
+          "skill:aws",
+          "min:senior"
+        ],
+        "duedate": "2026-10-31",
+        "customfield_10016": 8.0
+      }
+    },
+    {
+      "id": "10006",
+      "key": "DPE-107",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-107",
+      "fields": {
+        "summary": "Cost dashboard per squad",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Low"
+        },
+        "labels": [
+          "skill:python",
+          "skill:aws"
+        ],
+        "duedate": null,
+        "customfield_10016": 5.0
+      }
+    },
+    {
+      "id": "10007",
+      "key": "DPE-108",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-108",
+      "fields": {
+        "summary": "Rust build runtime for the monorepo",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:rust"
+        ],
+        "duedate": null,
+        "customfield_10016": 21.0
+      }
+    },
+    {
+      "id": "10008",
+      "key": "DPE-109",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-109",
+      "fields": {
+        "summary": "Ephemeral PR environments",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:kubernetes",
+          "skill:ci-cd"
+        ],
+        "duedate": "2026-12-15",
+        "customfield_10016": 21.0
+      }
+    },
+    {
+      "id": "10009",
+      "key": "DPE-110",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-110",
+      "fields": {
+        "summary": "Autoscaling for CI runners",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Diego Alves",
+          "emailAddress": "diego.alves@yourcompany.com",
+          "accountId": "5f00000000000000000000000009"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:ci-cd",
+          "skill:go"
+        ],
+        "duedate": null,
+        "customfield_10016": 8.0
+      }
+    },
+    {
+      "id": "10010",
+      "key": "DPE-111",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-111",
+      "fields": {
+        "summary": "Automated repository onboarding",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Low"
+        },
+        "labels": [
+          "skill:python",
+          "skill:ci-cd"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10011",
+      "key": "DPE-112",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-112",
+      "fields": {
+        "summary": "SLOs and alerting as code",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:observability",
+          "skill:python"
+        ],
+        "duedate": null,
+        "customfield_10016": 13.0
+      }
+    },
+    {
+      "id": "10012",
+      "key": "DPE-113",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-113",
+      "fields": {
+        "summary": "Decommission legacy Jenkins",
+        "status": {
+          "name": "Done",
+          "statusCategory": {
+            "key": "done"
+          }
+        },
+        "assignee": {
+          "displayName": "Bruno Lima",
+          "emailAddress": "bruno.lima@yourcompany.com",
+          "accountId": "5f00000000000000000000000012"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:ci-cd"
+        ],
+        "duedate": null,
+        "customfield_10016": 8.0
+      }
+    },
+    {
+      "id": "10013",
+      "key": "DPE-114",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-114",
+      "fields": {
+        "summary": "Service catalogue in Backstage",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:backstage"
+        ],
+        "duedate": "2026-10-15",
+        "customfield_10016": 13.0
+      }
+    }
+  ],
+  "isLast": true
+}

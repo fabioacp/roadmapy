@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Developer Platform Engineering — Roadmap &amp; Capacity</title><style>:root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --plane: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --hairline: rgba(11,11,11,0.10);
+    --good: #0ca30c;
+    --warning: #fab219;
+    --critical: #d03b3b;
+    --series-1: #2a78d6;
+    --series-2: #008300;
+    --series-3: #e87ba4;
+    --series-4: #eda100;
+    --series-5: #1baf7a;
+    --heat-0: #cde2fb; --heat-ink-0: #0b0b0b;
+    --heat-1: #9ec5f4; --heat-ink-1: #0b0b0b;
+    --heat-2: #6da7ec; --heat-ink-2: #0b0b0b;
+    --heat-3: #3987e5; --heat-ink-3: #ffffff;
+    --heat-4: #256abf; --heat-ink-4: #ffffff;
+    --heat-5: #184f95; --heat-ink-5: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --plane: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --hairline: rgba(255,255,255,0.10);
+    --series-1: #3987e5;
+    --series-2: #008300;
+    --series-3: #d55181;
+    --series-4: #c98500;
+    --series-5: #199e70;
+    --heat-0: #0d366b; --heat-ink-0: #c3c2b7;
+    --heat-1: #104281; --heat-ink-1: #c3c2b7;
+    --heat-2: #1c5cab; --heat-ink-2: #ffffff;
+    --heat-3: #2a78d6; --heat-ink-3: #ffffff;
+    --heat-4: #5598e7; --heat-ink-4: #0b0b0b;
+    --heat-5: #86b6ef; --heat-ink-5: #0b0b0b;
+  }
+}
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --plane: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --hairline: rgba(255,255,255,0.10);
+    --series-1: #3987e5;
+    --series-2: #008300;
+    --series-3: #d55181;
+    --series-4: #c98500;
+    --series-5: #199e70;
+    --heat-0: #0d366b; --heat-ink-0: #c3c2b7;
+    --heat-1: #104281; --heat-ink-1: #c3c2b7;
+    --heat-2: #1c5cab; --heat-ink-2: #ffffff;
+    --heat-3: #2a78d6; --heat-ink-3: #ffffff;
+    --heat-4: #5598e7; --heat-ink-4: #0b0b0b;
+    --heat-5: #86b6ef; --heat-ink-5: #0b0b0b;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 32px 24px 80px;
+  background: var(--plane); color: var(--text-primary);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.wrap { max-width: 1240px; margin: 0 auto; }
+h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 16px; margin: 0 0 16px; letter-spacing: -0.005em; }
+.sub { color: var(--text-secondary); margin: 0 0 28px; }
+section {
+  background: var(--surface-1); border: 1px solid var(--hairline);
+  border-radius: 12px; padding: 20px; margin-bottom: 20px;
+}
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.tile { background: var(--surface-1); border: 1px solid var(--hairline); border-radius: 12px; padding: 16px 18px; }
+.tile .k { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+.tile .v { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+.tile .n { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* --- Gantt --------------------------------------------------------------- */
+.gantt { overflow-x: auto; }
+.gantt-inner { min-width: 900px; }
+.grow { display: grid; grid-template-columns: 190px 1fr; align-items: stretch; }
+.gname {
+  padding: 8px 12px 8px 0; border-right: 1px solid var(--grid);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.gname b { font-weight: 600; }
+.gname span { font-size: 11px; color: var(--muted); }
+.gtrack { position: relative; padding: 6px 0; }
+.gline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--grid); }
+.lane { position: relative; height: 26px; margin-bottom: 4px; }
+.bar {
+  position: absolute; top: 2px; height: 22px; border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--surface-1);
+  display: flex; align-items: center; padding: 0 7px; overflow: hidden;
+  font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; cursor: default;
+}
+.bar.ink-dark { color: #0b0b0b; }
+/* Suggestion: hatching + dashed outline. The texture is the redundant channel —
+   the ORIGIN column and the legend say the same thing without relying on colour. */
+.bar.suggested {
+  background-image: repeating-linear-gradient(135deg,
+    rgba(255,255,255,.34) 0 5px, rgba(255,255,255,0) 5px 10px);
+  outline: 1px dashed var(--surface-1); outline-offset: -3px;
+}
+.bar .warn-mark { margin-left: 5px; }
+.axis { display: grid; grid-template-columns: 190px 1fr; margin-top: 4px; }
+.axis-months { position: relative; height: 20px; border-top: 1px solid var(--baseline); }
+.axis-months span {
+  position: absolute; top: 3px; font-size: 11px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--critical); opacity: 0.8; }
+.today-tag { position: absolute; top: -18px; transform: translateX(-50%); font-size: 10px; color: var(--critical); font-weight: 600; }
+
+/* --- Quarter cards -------------------------------------------------------- */
+.quarters { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.qcard { border: 1px solid var(--hairline); border-radius: 10px; padding: 14px; }
+.qcard.nodate { border-style: dashed; }
+.qhead { display: flex; flex-direction: column; margin-bottom: 10px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--grid); }
+.qhead b { font-size: 15px; letter-spacing: -0.01em; }
+.qhead span { font-size: 11px; color: var(--muted); }
+.qitem { display: flex; align-items: baseline; gap: 6px; font-size: 12px;
+  padding: 4px 0; cursor: default; }
+.qkey { font-weight: 600; flex: none; }
+.qsum { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+.qwhen { margin-left: auto; color: var(--muted); flex: none;
+  font-variant-numeric: tabular-nums; }
+
+/* --- Legend --------------------------------------------------------------- */
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--grid); }
+.legend div { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.swatch { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+
+/* --- Tables --------------------------------------------------------------- */
+/* The table scrolls inside its own container — the body never scrolls sideways. */
+.tw { overflow-x: auto; }
+.tw table { min-width: 820px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 600; color: var(--text-secondary); font-size: 12px; padding: 6px 10px; border-bottom: 1px solid var(--baseline); }
+td { padding: 7px 10px; border-bottom: 1px solid var(--grid); }
+td.num { font-variant-numeric: tabular-nums; text-align: right; }
+tr:last-child td { border-bottom: none; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+.pill { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; border: 1px solid var(--hairline); color: var(--text-secondary); }
+.warn { color: var(--warning); font-weight: 600; }
+.crit { color: var(--critical); font-weight: 600; }
+.ok { color: var(--good); font-weight: 600; }
+
+/* --- Heatmap ------------------------------------------------------------- */
+.heat { overflow-x: auto; }
+.heat table { border-collapse: separate; border-spacing: 2px; min-width: 700px; }
+.heat td.cell {
+  border: none; border-radius: 4px; text-align: center; font-size: 11px;
+  font-weight: 600; font-variant-numeric: tabular-nums; padding: 9px 6px; cursor: default;
+}
+.heat th { border-bottom: none; font-variant-numeric: tabular-nums; }
+
+/* --- Tooltip ------------------------------------------------------------- */
+#tip {
+  position: fixed; z-index: 50; pointer-events: none; opacity: 0;
+  transition: opacity .1s; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--hairline); border-radius: 8px; padding: 8px 10px;
+  font-size: 12px; line-height: 1.45; box-shadow: 0 6px 20px rgba(0,0,0,.18); max-width: 300px;
+}
+#tip b { display: block; margin-bottom: 3px; }
+details summary { cursor: pointer; color: var(--text-secondary); font-size: 13px; margin-bottom: 12px; }
+</style></head><body><div class="wrap"><h1>Developer Platform Engineering — Roadmap &amp; Capacity</h1>
+<p class="sub">Generated 22/07/2026 · 5 people · 30% overhead · 3 epic(s) with a declared owner in [[assignments]]</p>
+<div class="tiles">
+<div class="tile"><div class="k">Declared owner</div><div class="v">3</div><div class="n">from [[assignments]] — fact</div></div>
+<div class="tile"><div class="k">Suggested by the tool</div><div class="v">9</div><div class="n">of 13 epics in the backlog</div></div>
+<div class="tile"><div class="k">Committed effort</div><div class="v">214</div><div class="n">senior-days</div></div>
+<div class="tile"><div class="k">Current backlog ends</div><div class="v">May/27</div><div class="n">last epic finishes 20/05/2027</div></div>
+<div class="tile"><div class="k">Unstaffed</div><div class="v crit">1</div><div class="n">skill gap on the team</div></div>
+<div class="tile"><div class="k">No estimate</div><div class="v warn">1</div><div class="n">assumed 10 senior-days</div></div>
+</div>
+<section><h2>Roadmap by person</h2>
+<div class="gantt"><div class="gantt-inner">
+<div class="grow">
+<div class="gname" style="min-height:72px"><b>Alex</b><span>senior · 100% FTE · 2 epic(s)</span></div>
+<div class="gtrack">
+<div class="gline" style="left:0.000%"></div><div class="gline" style="left:9.568%"></div><div class="gline" style="left:19.136%"></div><div class="gline" style="left:28.395%"></div><div class="gline" style="left:37.963%"></div><div class="gline" style="left:47.222%"></div><div class="gline" style="left:56.790%"></div><div class="gline" style="left:66.358%"></div><div class="gline" style="left:75.000%"></div><div class="gline" style="left:84.568%"></div><div class="gline" style="left:93.827%"></div>
+<div class="today" style="left:6.481%"></div>
+<div class="lane">
+<div class="bar" style="left:6.481%;width:16.049%;background-color:var(--series-1)" data-tip="&lt;b&gt;DPE-1011&lt;/b&gt;Migrate EKS clusters to 1.31&lt;br&gt;Alex (senior) · 100% FTE&lt;br&gt;22/07/2026 → 11/09/2026 · 19.5 senior-days&lt;br&gt;Due 30/09/2026 — on time&lt;br&gt;✓ declared in [[assignments]]">DPE-1011</div>
+</div>
+<div class="lane">
+<div class="bar suggested" style="left:22.222%;width:8.025%;background-color:var(--series-1)" data-tip="&lt;b&gt;DPE-1061&lt;/b&gt;Automatic secret rotation in Vault&lt;br&gt;Alex (senior) · 100% FTE&lt;br&gt;11/09/2026 → 06/10/2026 · 12.0 senior-days&lt;br&gt;Due 31/10/2026 — on time&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1061</div>
+</div>
+</div></div>
+<div class="grow">
+<div class="gname" style="min-height:72px"><b>Daniell</b><span>senior · 100% FTE · 3 epic(s)</span></div>
+<div class="gtrack">
+<div class="gline" style="left:0.000%"></div><div class="gline" style="left:9.568%"></div><div class="gline" style="left:19.136%"></div><div class="gline" style="left:28.395%"></div><div class="gline" style="left:37.963%"></div><div class="gline" style="left:47.222%"></div><div class="gline" style="left:56.790%"></div><div class="gline" style="left:66.358%"></div><div class="gline" style="left:75.000%"></div><div class="gline" style="left:84.568%"></div><div class="gline" style="left:93.827%"></div>
+<div class="today" style="left:6.481%"></div>
+<div class="lane">
+<div class="bar" style="left:6.481%;width:20.062%;background-color:var(--series-2)" data-tip="&lt;b&gt;DPE-1031&lt;/b&gt;Centralise metrics and traces in OTel Collector&lt;br&gt;Daniell (senior) · 60% FTE&lt;br&gt;22/07/2026 → 24/09/2026 · 19.5 senior-days&lt;br&gt;✓ declared in [[assignments]]">DPE-1031</div>
+<div class="bar suggested" style="left:37.346%;width:12.654%;background-color:var(--series-2)" data-tip="&lt;b&gt;DPE-1121&lt;/b&gt;SLOs and alerting as code&lt;br&gt;Daniell (senior) · 100% FTE&lt;br&gt;30/10/2026 → 09/12/2026 · 19.5 senior-days&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1121</div>
+</div>
+<div class="lane">
+<div class="bar suggested" style="left:6.481%;width:31.173%;background-color:var(--series-2)" data-tip="&lt;b&gt;DPE-1091&lt;/b&gt;Ephemeral PR environments&lt;br&gt;Daniell (senior) · 100% FTE&lt;br&gt;22/07/2026 → 30/10/2026 · 31.5 senior-days&lt;br&gt;Due 15/12/2026 — on time&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1091</div>
+</div>
+</div></div>
+<div class="grow">
+<div class="gname" style="min-height:72px"><b>Oscar</b><span>mid · 100% FTE · 2 epic(s)</span></div>
+<div class="gtrack">
+<div class="gline" style="left:0.000%"></div><div class="gline" style="left:9.568%"></div><div class="gline" style="left:19.136%"></div><div class="gline" style="left:28.395%"></div><div class="gline" style="left:37.963%"></div><div class="gline" style="left:47.222%"></div><div class="gline" style="left:56.790%"></div><div class="gline" style="left:66.358%"></div><div class="gline" style="left:75.000%"></div><div class="gline" style="left:84.568%"></div><div class="gline" style="left:93.827%"></div>
+<div class="today" style="left:6.481%"></div>
+<div class="lane">
+<div class="bar ink-dark suggested" style="left:6.481%;width:10.802%;background-color:var(--series-3)" data-tip="&lt;b&gt;DPE-1041&lt;/b&gt;Self-service S3 buckets via Terraform module&lt;br&gt;Oscar (mid) · 100% FTE&lt;br&gt;22/07/2026 → 25/08/2026 · 12.0 senior-days&lt;br&gt;Due 15/09/2026 — on time&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1041</div>
+</div>
+<div class="lane">
+<div class="bar ink-dark suggested" style="left:16.975%;width:6.790%;background-color:var(--series-3)" data-tip="&lt;b&gt;DPE-1071&lt;/b&gt;Cost dashboard per squad&lt;br&gt;Oscar (mid) · 100% FTE&lt;br&gt;25/08/2026 → 15/09/2026 · 7.5 senior-days&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1071</div>
+</div>
+</div></div>
+<div class="grow">
+<div class="gname" style="min-height:72px"><b>Karthi</b><span>mid · 60% FTE · 3 epic(s)</span></div>
+<div class="gtrack">
+<div class="gline" style="left:0.000%"></div><div class="gline" style="left:9.568%"></div><div class="gline" style="left:19.136%"></div><div class="gline" style="left:28.395%"></div><div class="gline" style="left:37.963%"></div><div class="gline" style="left:47.222%"></div><div class="gline" style="left:56.790%"></div><div class="gline" style="left:66.358%"></div><div class="gline" style="left:75.000%"></div><div class="gline" style="left:84.568%"></div><div class="gline" style="left:93.827%"></div>
+<div class="today" style="left:6.481%"></div>
+<div class="lane">
+<div class="bar ink-dark" style="left:6.481%;width:17.593%;background-color:var(--series-4)" data-tip="&lt;b&gt;DPE-1101&lt;/b&gt;Autoscaling for CI runners&lt;br&gt;Karthi (mid) · 100% FTE&lt;br&gt;22/07/2026 → 16/09/2026 · 12.0 senior-days&lt;br&gt;✓ declared in [[assignments]]">DPE-1101</div>
+<div class="bar ink-dark suggested" style="left:52.469%;width:47.531%;background-color:var(--series-4)" data-tip="&lt;b&gt;DPE-1021&lt;/b&gt;Golden path for Go services in Backstage&lt;br&gt;Karthi (mid) · 100% FTE&lt;br&gt;18/12/2026 → 20/05/2027 · 31.5 senior-days&lt;br&gt;Due 30/11/2026 — 171d LATE&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1021</div>
+</div>
+<div class="lane">
+<div class="bar ink-dark suggested" style="left:23.765%;width:29.012%;background-color:var(--series-4)" data-tip="&lt;b&gt;DPE-1141&lt;/b&gt;Service catalogue in Backstage&lt;br&gt;Karthi (mid) · 100% FTE&lt;br&gt;16/09/2026 → 18/12/2026 · 19.5 senior-days&lt;br&gt;Due 15/10/2026 — 64d LATE&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1141</div>
+</div>
+</div></div>
+<div class="grow">
+<div class="gname" style="min-height:72px"><b>Brad</b><span>junior · 100% FTE · 2 epic(s)</span></div>
+<div class="gtrack">
+<div class="gline" style="left:0.000%"></div><div class="gline" style="left:9.568%"></div><div class="gline" style="left:19.136%"></div><div class="gline" style="left:28.395%"></div><div class="gline" style="left:37.963%"></div><div class="gline" style="left:47.222%"></div><div class="gline" style="left:56.790%"></div><div class="gline" style="left:66.358%"></div><div class="gline" style="left:75.000%"></div><div class="gline" style="left:84.568%"></div><div class="gline" style="left:93.827%"></div>
+<div class="today" style="left:6.481%"></div>
+<div class="lane">
+<div class="bar ink-dark suggested" style="left:6.481%;width:26.543%;background-color:var(--series-5)" data-tip="&lt;b&gt;DPE-1051&lt;/b&gt;Standardise CI pipelines into a reusable template&lt;br&gt;Brad (junior) · 100% FTE&lt;br&gt;22/07/2026 → 15/10/2026 · 19.5 senior-days&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1051</div>
+</div>
+<div class="lane">
+<div class="bar ink-dark suggested" style="left:32.716%;width:14.506%;background-color:var(--series-5)" data-tip="&lt;b&gt;DPE-1111&lt;/b&gt;Automated repository onboarding&lt;br&gt;Brad (junior) · 100% FTE&lt;br&gt;15/10/2026 → 30/11/2026 · 10.0 senior-days&lt;br&gt;◇ tool suggestion — nobody assigned yet">DPE-1111</div>
+</div>
+</div></div>
+<div class="axis"><div></div><div class="axis-months">
+<div class="today" style="left:6.481%"><div class="today-tag">today</div></div>
+<span style="left:0.000%">&nbsp;Jul/26</span>
+<span style="left:9.568%">&nbsp;Aug/26</span>
+<span style="left:19.136%">&nbsp;Sep/26</span>
+<span style="left:28.395%">&nbsp;Oct/26</span>
+<span style="left:37.963%">&nbsp;Nov/26</span>
+<span style="left:47.222%">&nbsp;Dec/26</span>
+<span style="left:56.790%">&nbsp;Jan/27</span>
+<span style="left:66.358%">&nbsp;Feb/27</span>
+<span style="left:75.000%">&nbsp;Mar/27</span>
+<span style="left:84.568%">&nbsp;Apr/27</span>
+<span style="left:93.827%">&nbsp;May/27</span>
+</div></div>
+<div class="legend">
+<div><span class="swatch" style="background:var(--series-1)"></span>Alex</div>
+<div><span class="swatch" style="background:var(--series-2)"></span>Daniell</div>
+<div><span class="swatch" style="background:var(--series-3)"></span>Oscar</div>
+<div><span class="swatch" style="background:var(--series-4)"></span>Karthi</div>
+<div><span class="swatch" style="background:var(--series-5)"></span>Brad</div>
+<div style="margin-left:auto"><span class="swatch" style="background:var(--muted)"></span>solid = declared (fact)</div>
+<div><span class="swatch suggested" style="background-color:var(--muted);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.5) 0 3px,rgba(255,255,255,0) 3px 6px)"></span>hatched = suggestion</div>
+</div></div></div></section>
+<section><h2>By quarter</h2>
+<p class="sub" style="margin-bottom:16px">The same plan grouped by delivery quarter — the view for a planning conversation.</p>
+<div class="quarters">
+<div class="qcard">
+<div class="qhead"><b>Q1 FY27</b><span>5 epic(s) · 70 senior-days</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1041&lt;/b&gt;Self-service S3 buckets via Terraform module&lt;br&gt;Oscar · delivers 25/08/2026"><span class="dot" style="background:var(--series-3)"></span><span class="qkey">◇ DPE-1041</span><span class="qsum">Self-service S3 buckets via Terraform module</span><span class="qwhen">25/08</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1011&lt;/b&gt;Migrate EKS clusters to 1.31&lt;br&gt;Alex · delivers 11/09/2026"><span class="dot" style="background:var(--series-1)"></span><span class="qkey">▪ DPE-1011</span><span class="qsum">Migrate EKS clusters to 1.31</span><span class="qwhen">11/09</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1071&lt;/b&gt;Cost dashboard per squad&lt;br&gt;Oscar · delivers 15/09/2026"><span class="dot" style="background:var(--series-3)"></span><span class="qkey">◇ DPE-1071</span><span class="qsum">Cost dashboard per squad</span><span class="qwhen">15/09</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1101&lt;/b&gt;Autoscaling for CI runners&lt;br&gt;Karthi · delivers 16/09/2026"><span class="dot" style="background:var(--series-4)"></span><span class="qkey">▪ DPE-1101</span><span class="qsum">Autoscaling for CI runners</span><span class="qwhen">16/09</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1031&lt;/b&gt;Centralise metrics and traces in OTel Collector&lt;br&gt;Daniell · delivers 24/09/2026"><span class="dot" style="background:var(--series-2)"></span><span class="qkey">▪ DPE-1031</span><span class="qsum">Centralise metrics and traces in OTel Collec</span><span class="qwhen">24/09</span></div>
+</div>
+<div class="qcard">
+<div class="qhead"><b>Q2 FY27</b><span>6 epic(s) · 112 senior-days</span></div>
+<div class="crit" style="font-size:11px;margin-bottom:8px">⚠ 1 past deadline</div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1061&lt;/b&gt;Automatic secret rotation in Vault&lt;br&gt;Alex · delivers 06/10/2026"><span class="dot" style="background:var(--series-1)"></span><span class="qkey">◇ DPE-1061</span><span class="qsum">Automatic secret rotation in Vault</span><span class="qwhen">06/10</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1051&lt;/b&gt;Standardise CI pipelines into a reusable template&lt;br&gt;Brad · delivers 15/10/2026"><span class="dot" style="background:var(--series-5)"></span><span class="qkey">◇ DPE-1051</span><span class="qsum">Standardise CI pipelines into a reusable tem</span><span class="qwhen">15/10</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1091&lt;/b&gt;Ephemeral PR environments&lt;br&gt;Daniell · delivers 30/10/2026"><span class="dot" style="background:var(--series-2)"></span><span class="qkey">◇ DPE-1091</span><span class="qsum">Ephemeral PR environments</span><span class="qwhen">30/10</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1111&lt;/b&gt;Automated repository onboarding&lt;br&gt;Brad · delivers 30/11/2026"><span class="dot" style="background:var(--series-5)"></span><span class="qkey">◇ DPE-1111</span><span class="qsum">Automated repository onboarding</span><span class="qwhen">30/11</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1121&lt;/b&gt;SLOs and alerting as code&lt;br&gt;Daniell · delivers 09/12/2026"><span class="dot" style="background:var(--series-2)"></span><span class="qkey">◇ DPE-1121</span><span class="qsum">SLOs and alerting as code</span><span class="qwhen">09/12</span></div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1141&lt;/b&gt;Service catalogue in Backstage&lt;br&gt;Karthi · delivers 18/12/2026"><span class="dot" style="background:var(--series-4)"></span><span class="qkey">◇ DPE-1141</span><span class="qsum">Service catalogue in Backstage</span><span class="qwhen">18/12</span></div>
+</div>
+<div class="qcard">
+<div class="qhead"><b>Q4 FY27</b><span>1 epic(s) · 32 senior-days</span></div>
+<div class="crit" style="font-size:11px;margin-bottom:8px">⚠ 1 past deadline</div>
+<div class="qitem" data-tip="&lt;b&gt;DPE-1021&lt;/b&gt;Golden path for Go services in Backstage&lt;br&gt;Karthi · delivers 20/05/2027"><span class="dot" style="background:var(--series-4)"></span><span class="qkey">◇ DPE-1021</span><span class="qsum">Golden path for Go services in Backstage</span><span class="qwhen">20/05</span></div>
+</div>
+<div class="qcard nodate"><div class="qhead"><b>No date</b><span>1 epic(s) with nobody eligible</span></div>
+<div class="qitem"><span class="qkey crit">✗ DPE-1081</span><span class="qsum">Rust build runtime for the monorepo</span></div>
+</div>
+</div>
+<p class="sub" style="margin:14px 0 0;font-size:12px">▪ declared in [[assignments]] &nbsp;·&nbsp; ◇ tool suggestion</p>
+</section>
+<section><h2>Monthly utilisation</h2>
+<p class="sub" style="margin-bottom:14px">Percentage of effective capacity already committed to the current backlog. Blank space on the right is what you have left to sell.</p>
+<div class="heat"><table><thead><tr><th>Person</th>
+<th>07/26</th>
+<th>08/26</th>
+<th>09/26</th>
+<th>10/26</th>
+<th>11/26</th>
+<th>12/26</th>
+<th>01/27</th>
+<th>02/27</th>
+<th>03/27</th>
+</tr></thead><tbody>
+<tr><td>Alex</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Alex · 2026-07&lt;/b&gt;5.6 of 5.6 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Alex · 2026-08&lt;/b&gt;7.7 of 7.7 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Alex · 2026-09&lt;/b&gt;15.4 of 15.4 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-1);color:var(--heat-ink-1)" data-tip="&lt;b&gt;Alex · 2026-10&lt;/b&gt;2.8 of 15.4 senior-days committed&lt;br&gt;free: 12.6 senior-days">18%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Alex · 2026-11&lt;/b&gt;0.0 of 14.7 senior-days committed&lt;br&gt;free: 14.7 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Alex · 2026-12&lt;/b&gt;0.0 of 14.7 senior-days committed&lt;br&gt;free: 14.7 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Alex · 2027-01&lt;/b&gt;0.0 of 14.7 senior-days committed&lt;br&gt;free: 14.7 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Alex · 2027-02&lt;/b&gt;0.0 of 14.0 senior-days committed&lt;br&gt;free: 14.0 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Alex · 2027-03&lt;/b&gt;0.0 of 16.1 senior-days committed&lt;br&gt;free: 16.1 senior-days">0%</td>
+</tr>
+<tr><td>Daniell</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Daniell · 2026-07&lt;/b&gt;5.6 of 5.6 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Daniell · 2026-08&lt;/b&gt;14.7 of 14.7 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Daniell · 2026-09&lt;/b&gt;15.4 of 15.4 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Daniell · 2026-10&lt;/b&gt;15.4 of 15.4 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Daniell · 2026-11&lt;/b&gt;14.7 of 14.7 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-2);color:var(--heat-ink-2)" data-tip="&lt;b&gt;Daniell · 2026-12&lt;/b&gt;4.7 of 14.7 senior-days committed&lt;br&gt;free: 10.0 senior-days">32%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Daniell · 2027-01&lt;/b&gt;0.0 of 14.7 senior-days committed&lt;br&gt;free: 14.7 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Daniell · 2027-02&lt;/b&gt;0.0 of 14.0 senior-days committed&lt;br&gt;free: 14.0 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Daniell · 2027-03&lt;/b&gt;0.0 of 16.1 senior-days committed&lt;br&gt;free: 16.1 senior-days">0%</td>
+</tr>
+<tr><td>Oscar</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Oscar · 2026-07&lt;/b&gt;3.9 of 3.9 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Oscar · 2026-08&lt;/b&gt;10.3 of 10.3 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-4);color:var(--heat-ink-4)" data-tip="&lt;b&gt;Oscar · 2026-09&lt;/b&gt;5.3 of 6.9 senior-days committed&lt;br&gt;free: 1.6 senior-days">77%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Oscar · 2026-10&lt;/b&gt;0.0 of 9.8 senior-days committed&lt;br&gt;free: 9.8 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Oscar · 2026-11&lt;/b&gt;0.0 of 10.3 senior-days committed&lt;br&gt;free: 10.3 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Oscar · 2026-12&lt;/b&gt;0.0 of 10.3 senior-days committed&lt;br&gt;free: 10.3 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Oscar · 2027-01&lt;/b&gt;0.0 of 10.3 senior-days committed&lt;br&gt;free: 10.3 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Oscar · 2027-02&lt;/b&gt;0.0 of 9.8 senior-days committed&lt;br&gt;free: 9.8 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Oscar · 2027-03&lt;/b&gt;0.0 of 11.3 senior-days committed&lt;br&gt;free: 11.3 senior-days">0%</td>
+</tr>
+<tr><td>Karthi</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2026-07&lt;/b&gt;2.4 of 2.4 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2026-08&lt;/b&gt;6.2 of 6.2 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2026-09&lt;/b&gt;6.5 of 6.5 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2026-10&lt;/b&gt;6.5 of 6.5 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2026-11&lt;/b&gt;6.2 of 6.2 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2026-12&lt;/b&gt;6.2 of 6.2 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2027-01&lt;/b&gt;6.2 of 6.2 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2027-02&lt;/b&gt;5.9 of 5.9 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Karthi · 2027-03&lt;/b&gt;6.8 of 6.8 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+</tr>
+<tr><td>Brad</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Brad · 2026-07&lt;/b&gt;2.5 of 2.5 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Brad · 2026-08&lt;/b&gt;6.6 of 6.6 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Brad · 2026-09&lt;/b&gt;6.9 of 6.9 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Brad · 2026-10&lt;/b&gt;6.9 of 6.9 senior-days committed&lt;br&gt;free: 0.0 senior-days">100%</td>
+<td class="cell" style="background:var(--heat-5);color:var(--heat-ink-5)" data-tip="&lt;b&gt;Brad · 2026-11&lt;/b&gt;6.5 of 6.6 senior-days committed&lt;br&gt;free: 0.1 senior-days">98%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Brad · 2026-12&lt;/b&gt;0.0 of 6.6 senior-days committed&lt;br&gt;free: 6.6 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Brad · 2027-01&lt;/b&gt;0.0 of 6.6 senior-days committed&lt;br&gt;free: 6.6 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Brad · 2027-02&lt;/b&gt;0.0 of 6.3 senior-days committed&lt;br&gt;free: 6.3 senior-days">0%</td>
+<td class="cell" style="background:var(--heat-0);color:var(--heat-ink-0)" data-tip="&lt;b&gt;Brad · 2027-03&lt;/b&gt;0.0 of 7.2 senior-days committed&lt;br&gt;free: 7.2 senior-days">0%</td>
+</tr>
+</tbody></table></div></section>
+<section><h2>Unassigned epics — who would take them and when</h2>
+<p class="sub" style="margin-bottom:14px">None of these are in <code>[[assignments]]</code>. The tool proposes the owner by the first free window among those who have the skill. To make it a commitment, declare it in the config.</p>
+<div class="tw"><table><thead><tr><th>Epic</th><th>Summary</th><th>Suggestion</th><th class='num'>Wait</th><th>Starts</th><th>Delivers</th><th>Alternatives</th></tr></thead><tbody>
+<tr><td>DPE-1091</td><td>Ephemeral PR environments</td><td><span class="dot" style="background:var(--series-2)"></span>Daniell <span class="pill">senior</span></td><td class='num'><span class="ok">today</span></td><td>22/07/2026</td><td>30/10/2026</td><td style='color:var(--text-secondary)'>Alex (07/10)</td></tr>
+<tr><td>DPE-1041</td><td>Self-service S3 buckets via Terraform module</td><td><span class="dot" style="background:var(--series-3)"></span>Oscar <span class="pill">mid</span></td><td class='num'><span class="ok">today</span></td><td>22/07/2026</td><td>25/08/2026</td><td style='color:var(--text-secondary)'>Alex (07/10)</td></tr>
+<tr><td>DPE-1051</td><td>Standardise CI pipelines into a reusable template</td><td><span class="dot" style="background:var(--series-5)"></span>Brad <span class="pill">junior</span></td><td class='num'><span class="ok">today</span></td><td>22/07/2026</td><td>15/10/2026</td><td style='color:var(--text-secondary)'>Alex (07/10), Daniell (30/10)</td></tr>
+<tr><td>DPE-1071</td><td>Cost dashboard per squad</td><td><span class="dot" style="background:var(--series-3)"></span>Oscar <span class="pill">mid</span></td><td class='num'><span class="crit">34d</span></td><td>25/08/2026</td><td>15/09/2026</td><td style='color:var(--text-secondary)'>—</td></tr>
+<tr><td>DPE-1061</td><td>Automatic secret rotation in Vault</td><td><span class="dot" style="background:var(--series-1)"></span>Alex <span class="pill">senior</span></td><td class='num'><span class="crit">51d</span></td><td>11/09/2026</td><td>06/10/2026</td><td style='color:var(--text-secondary)'>—</td></tr>
+<tr><td>DPE-1141</td><td>Service catalogue in Backstage</td><td><span class="dot" style="background:var(--series-4)"></span>Karthi <span class="pill">mid</span></td><td class='num'><span class="crit">56d</span></td><td>16/09/2026</td><td>18/12/2026</td><td style='color:var(--text-secondary)'>—</td></tr>
+<tr><td>DPE-1111</td><td>Automated repository onboarding</td><td><span class="dot" style="background:var(--series-5)"></span>Brad <span class="pill">junior</span></td><td class='num'><span class="crit">85d</span></td><td>15/10/2026</td><td>30/11/2026</td><td style='color:var(--text-secondary)'>Daniell (09/12)</td></tr>
+<tr><td>DPE-1121</td><td>SLOs and alerting as code</td><td><span class="dot" style="background:var(--series-2)"></span>Daniell <span class="pill">senior</span></td><td class='num'><span class="crit">100d</span></td><td>30/10/2026</td><td>09/12/2026</td><td style='color:var(--text-secondary)'>—</td></tr>
+<tr><td>DPE-1021</td><td>Golden path for Go services in Backstage</td><td><span class="dot" style="background:var(--series-4)"></span>Karthi <span class="pill">mid</span></td><td class='num'><span class="crit">149d</span></td><td>18/12/2026</td><td>20/05/2027</td><td style='color:var(--text-secondary)'>—</td></tr>
+</tbody></table></div></section>
+<section><h2>Detailed allocation</h2>
+<div class="tw"><table><thead><tr><th>Epic</th><th>Summary</th><th>Owner</th><th>Priority</th><th>Origin</th><th class='num'>FTE</th><th>Start</th><th>End</th><th class='num'>Senior-days</th><th>Skills</th><th>Deadline</th></tr></thead><tbody>
+<tr><td>DPE-1041</td><td>Self-service S3 buckets via Terraform module</td><td><span class="dot" style="background:var(--series-3)"></span>Oscar</td><td>Medium</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>22/07/2026</td><td>25/08/2026</td><td class='num'>12.0</td><td><span class="pill">aws</span> <span class="pill">terraform</span></td><td><span class="ok">on time</span></td></tr>
+<tr><td>DPE-1011</td><td>Migrate EKS clusters to 1.31</td><td><span class="dot" style="background:var(--series-1)"></span>Alex</td><td>Highest</td><td><span class="pill" title="declared in [[assignments]]">✓ fact</span></td><td class='num'>100%</td><td>22/07/2026</td><td>11/09/2026</td><td class='num'>19.5</td><td><span class="pill">kubernetes</span> <span class="pill">terraform</span></td><td><span class="ok">on time</span></td></tr>
+<tr><td>DPE-1101</td><td>Autoscaling for CI runners</td><td><span class="dot" style="background:var(--series-4)"></span>Karthi</td><td>Medium</td><td><span class="pill" title="declared in [[assignments]]">✓ fact</span></td><td class='num'>100%</td><td>22/07/2026</td><td>16/09/2026</td><td class='num'>12.0</td><td><span class="pill">ci-cd</span> <span class="pill">go</span></td><td><span style="color:var(--muted)">—</span></td></tr>
+<tr><td>DPE-1031</td><td>Centralise metrics and traces in OTel Collector</td><td><span class="dot" style="background:var(--series-2)"></span>Daniell</td><td>High</td><td><span class="pill" title="declared in [[assignments]]">✓ fact</span></td><td class='num'>60%</td><td>22/07/2026</td><td>24/09/2026</td><td class='num'>19.5</td><td><span class="pill">kubernetes</span> <span class="pill">observability</span></td><td><span style="color:var(--muted)">—</span></td></tr>
+<tr><td>DPE-1051</td><td>Standardise CI pipelines into a reusable template</td><td><span class="dot" style="background:var(--series-5)"></span>Brad</td><td>Medium</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>22/07/2026</td><td>15/10/2026</td><td class='num'>19.5</td><td><span class="pill">ci-cd</span></td><td><span style="color:var(--muted)">—</span></td></tr>
+<tr><td>DPE-1091</td><td>Ephemeral PR environments</td><td><span class="dot" style="background:var(--series-2)"></span>Daniell</td><td>High</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>22/07/2026</td><td>30/10/2026</td><td class='num'>31.5</td><td><span class="pill">ci-cd</span> <span class="pill">kubernetes</span></td><td><span class="ok">on time</span></td></tr>
+<tr><td>DPE-1071</td><td>Cost dashboard per squad</td><td><span class="dot" style="background:var(--series-3)"></span>Oscar</td><td>Low</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>25/08/2026</td><td>15/09/2026</td><td class='num'>7.5</td><td><span class="pill">aws</span> <span class="pill">python</span></td><td><span style="color:var(--muted)">—</span></td></tr>
+<tr><td>DPE-1061</td><td>Automatic secret rotation in Vault</td><td><span class="dot" style="background:var(--series-1)"></span>Alex</td><td>High</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>11/09/2026</td><td>06/10/2026</td><td class='num'>12.0</td><td><span class="pill">aws</span> <span class="pill">terraform</span></td><td><span class="ok">on time</span></td></tr>
+<tr><td>DPE-1141</td><td>Service catalogue in Backstage</td><td><span class="dot" style="background:var(--series-4)"></span>Karthi</td><td>High</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>16/09/2026</td><td>18/12/2026</td><td class='num'>19.5</td><td><span class="pill">backstage</span></td><td><span class="crit">64d late</span></td></tr>
+<tr><td>DPE-1111</td><td>Automated repository onboarding</td><td><span class="dot" style="background:var(--series-5)"></span>Brad</td><td>Low</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>15/10/2026</td><td>30/11/2026</td><td class='num'><span class="warn" title="no estimate in Jira">10.0 ?</span></td><td><span class="pill">ci-cd</span> <span class="pill">python</span></td><td><span style="color:var(--muted)">—</span></td></tr>
+<tr><td>DPE-1121</td><td>SLOs and alerting as code</td><td><span class="dot" style="background:var(--series-2)"></span>Daniell</td><td>Medium</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>30/10/2026</td><td>09/12/2026</td><td class='num'>19.5</td><td><span class="pill">observability</span> <span class="pill">python</span></td><td><span style="color:var(--muted)">—</span></td></tr>
+<tr><td>DPE-1021</td><td>Golden path for Go services in Backstage</td><td><span class="dot" style="background:var(--series-4)"></span>Karthi</td><td>High</td><td><span class="pill" title="tool proposal">◇ suggestion</span></td><td class='num'>100%</td><td>18/12/2026</td><td>20/05/2027</td><td class='num'>31.5</td><td><span class="pill">backstage</span> <span class="pill">go</span></td><td><span class="crit">171d late</span></td></tr>
+</tbody></table></div></section>
+<section><h2><span class="crit">⚠</span> Epics with nobody eligible</h2>
+<p class="sub" style="margin-bottom:14px">Nobody on the roster meets the requirements. This is hiring, training, or scope renegotiation — not a queue.</p>
+<div class="tw"><table><thead><tr><th>Epic</th><th>Summary</th><th>Needs</th><th>Reason</th></tr></thead><tbody>
+<tr><td>DPE-1081</td><td>Rust build runtime for the monorepo</td><td><span class="pill">rust</span></td><td style='color:var(--text-secondary)'>Alex: missing skills: rust; Daniell: missing skills: rust; Oscar: missing skills: rust; Karthi: missing skills: rust; Brad: missing skills: rust</td></tr>
+</tbody></table></div></section>
+<section><h2>Skill coverage</h2>
+<div class="tw"><table><thead><tr><th>Skill</th><th class="num">People</th><th>Who</th><th>Risk</th></tr></thead><tbody>
+<tr><td>aws</td><td class='num'>2</td><td style='color:var(--text-secondary)'>Alex (senior), Oscar (mid)</td><td><span class="ok">■ ok</span></td></tr>
+<tr><td>backstage</td><td class='num'>1</td><td style='color:var(--text-secondary)'>Karthi (mid)</td><td><span class="crit">■ bus factor 1</span></td></tr>
+<tr><td>ci-cd</td><td class='num'>4</td><td style='color:var(--text-secondary)'>Alex (senior), Daniell (senior), Karthi (mid), Brad (junior)</td><td><span class="ok">■ ok</span></td></tr>
+<tr><td>go</td><td class='num'>2</td><td style='color:var(--text-secondary)'>Alex (senior), Karthi (mid)</td><td><span class="ok">■ ok</span></td></tr>
+<tr><td>kubernetes</td><td class='num'>2</td><td style='color:var(--text-secondary)'>Alex (senior), Daniell (senior)</td><td><span class="ok">■ ok</span></td></tr>
+<tr><td>observability</td><td class='num'>2</td><td style='color:var(--text-secondary)'>Daniell (senior), Karthi (mid)</td><td><span class="ok">■ ok</span></td></tr>
+<tr><td>python</td><td class='num'>3</td><td style='color:var(--text-secondary)'>Daniell (senior), Oscar (mid), Brad (junior)</td><td><span class="ok">■ ok</span></td></tr>
+<tr><td>rust</td><td class='num'>0</td><td style='color:var(--text-secondary)'>—</td><td><span class="crit">■ no coverage</span></td></tr>
+<tr><td>terraform</td><td class='num'>2</td><td style='color:var(--text-secondary)'>Alex (senior), Oscar (mid)</td><td><span class="ok">■ ok</span></td></tr>
+</tbody></table></div>
+<p class="sub" style="margin:14px 0 0">Skills requested by epics that nobody has: <b>rust</b> (DPE-1081)</p>
+</section></div><div id="tip"></div><script>
+const tip = document.getElementById('tip');
+document.addEventListener('mouseover', e => {
+  const el = e.target.closest('[data-tip]');
+  if (!el) return;
+  tip.innerHTML = el.dataset.tip;
+  tip.style.opacity = 1;
+});
+document.addEventListener('mousemove', e => {
+  if (tip.style.opacity !== '1') return;
+  const pad = 14, r = tip.getBoundingClientRect();
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - pad;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - pad;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+});
+document.addEventListener('mouseout', e => {
+  if (e.target.closest('[data-tip]')) tip.style.opacity = 0;
+});
+</script></body></html>
