@@ -3,28 +3,19 @@
 
 [team]
 name = "Developer Platform Engineering"
-# Nominal hours per week for one FTE. Used only for reporting in hours.
-hours_per_week = 40
-# Fraction of time that does NOT go to epics: meetings, on-call, support, interrupts.
-# 0.30 = 30% of the time vanishes. Be honest here — this is the number that
-# wrecks roadmaps most often.
-overhead_pct = 0.30
-# FTE assumed when the tool SUGGESTS someone for an open epic.
-# 1.0 = the suggestion assumes that person is fully dedicated to the epic.
-default_assignment_fte = 1.0
 # Month that Q1 of the fiscal year starts in. 7 = July (Q1 Jul-Sep, Q2 Oct-Dec,
 # Q3 Jan-Mar, Q4 Apr-Jun). The FY is named after the year it ENDS in, so with a
 # July start, August 2026 falls in Q1 FY27. Set to 1 for calendar quarters.
 fiscal_year_start_month = 7
 
-# Throughput multiplier by seniority.
-# Reference: 1 "senior-day" = 1 day of effective work by a senior.
-# A mid at 0.7 takes 1/0.7 = 1.43 days to deliver 1 senior-day.
+# The seniority levels that exist. The tool is date-driven, so these values are
+# NOT effort multipliers anymore — only the names (and the order below) matter,
+# for the "min:senior" requirement and the skill-coverage view.
 [throughput]
-principal = 1.3
+principal = 1.0
 senior = 1.0
-mid = 0.7
-junior = 0.45
+mid = 1.0
+junior = 1.0
 
 # Seniority order (lowest -> highest). Used for "I need at least a senior".
 [seniority]
@@ -49,39 +40,43 @@ holidays = [
 # pto:       time off and planned absences (inclusive on both ends)
 # ---------------------------------------------------------------------------
 
-[[people]]
-name = "Alex"
-seniority = "senior"
-skills = ["terraform", "aws", "kubernetes", "go", "ci-cd"]
-fte = 1.0
-pto = [{ start = "2026-08-03", end = "2026-08-14" }]
+# NOTE: seniority and skills below are GUESSES — please correct them. They drive
+# who can pick up a queued epic, so they matter.
 
 [[people]]
-name = "Daniell"
-seniority = "senior"
-skills = ["kubernetes", "observability", "python", "ci-cd"]
-fte = 1.0
+name = "Andrew"
+seniority = "senior"                                    # ← confirm
+skills = ["kubernetes", "api-gateway", "networking"]    # ← confirm
 pto = []
 
 [[people]]
-name = "Oscar"
-seniority = "mid"
-skills = ["terraform", "aws", "python"]
-fte = 1.0
-pto = [{ start = "2026-09-21", end = "2026-10-02" }]
+name = "Mayank"                                         # ← you wrote "myanak"; confirm spelling
+seniority = "senior"                                    # ← confirm
+skills = ["kubernetes", "api-gateway", "networking"]    # ← confirm
+pto = []
 
 [[people]]
-name = "Karthi"
-seniority = "mid"
-skills = ["go", "backstage", "ci-cd", "observability"]
-fte = 0.6   # 40% allocated to another team
+name = "Alex"
+seniority = "senior"                                    # ← confirm
+skills = ["terraform", "aws", "kubernetes", "ci-cd"]    # ← confirm
 pto = []
 
 [[people]]
 name = "Brad"
-seniority = "junior"
-skills = ["python", "ci-cd"]
-fte = 1.0
+seniority = "mid"                                       # ← confirm
+skills = ["python", "ci-cd", "go"]                      # ← confirm
+pto = []
+
+[[people]]
+name = "Karthi"
+seniority = "mid"                                       # ← confirm
+skills = ["artifactory", "ci-cd", "java", "security"]   # ← confirm
+pto = []
+
+[[people]]
+name = "Daniell"
+seniority = "senior"                                    # ← confirm
+skills = ["ai", "python", "kubernetes", "observability"] # ← confirm
 pto = []
 
 # ---------------------------------------------------------------------------
@@ -98,18 +93,21 @@ source = "csv"
 # folder, the most recent *.csv inside wins (so a folder of dated exports works).
 raw_csv = "data/raw"
 csv = "data/epics.csv"          # the cleaned file everything else reads
-# "points" or "days". If points, converts using points_to_days.
-estimate_unit = "points"
+estimate_unit = "points"        # kept for the export; not used by the date model
 points_to_days = 1.5
-# Epics with no estimate come in with this value (in senior-days) and get flagged.
 default_estimate_days = 10
 # Labels that become a skill requirement: "skill:terraform" -> terraform
 skill_label_prefix = "skill:"
 # Label that requires a minimum seniority: "min:senior" -> senior or principal only
 min_seniority_label_prefix = "min:"
-# Label that assigns an owner: "owner:alex" or "owner:alex:60" (60% FTE).
-# Several owner labels on one epic = shared ownership, co-scheduled.
+# Label that assigns an owner: "owner:alex" or "owner:alex:60".
 owner_label_prefix = "owner:"
+# Labels that set an epic's PLANNED PERIOD. An epic with both start: and end: is
+# "active" and plotted on the timeline as-is. Jira has no start-date field, so the
+# start comes from a label; you can point end: at the Due date or a separate label.
+#   start:2026-07-01   end:2026-09-11
+start_label_prefix = "start:"
+end_label_prefix = "end:"
 # Statuses that mean "already delivered" — they drop out of the roadmap.
 done_statuses = ["Done", "Closed", "Resolved", "Cancelled"]
 # Jira priority order (first = most urgent).
@@ -126,25 +124,24 @@ priority_order = ["Highest", "High", "Medium", "Low", "Lowest"]
 # forced here, and `validate` warns if the key does not exist in the backlog.
 # ---------------------------------------------------------------------------
 [priority]
-"DPE-1141" = "Highest"   # the catalog became a commitment to leadership
-"DPE-1051" = "Low"       # can wait, nobody is blocked
+"DPE-210" = "High"   # example: CICD parallel test stages bumped up
 
 # ---------------------------------------------------------------------------
-# WHO IS WORKING ON WHAT  —  lives entirely in Jira, as owner: labels.
+# HOW THE ROADMAP WORKS  —  everything lives in Jira, as labels.
 #
-# There is NO assignment table here anymore. On the epic in Jira, add:
+# ACTIVE epic  = has start: AND end: labels. Its period is plotted as-is, in each
+#                owner's lane. owner: labels say who is on it.
+#                  start:2026-07-01  end:2026-09-11  owner:alex
+#                  start:2026-08-01  end:2026-10-20  owner:alex:50  owner:daniell:50  (shared)
 #
-#   owner:alex             Alex owns it, 100% dedicated
-#   owner:daniell:60       Daniell, 60% of his day on it (40% free for other work)
-#   owner:alex owner:oscar two owners, shared and co-scheduled (they finish together)
+# QUEUED epic  = has no start:/end:. It waits, ordered by priority. The tool
+#                reports the first person with the right skills to free up, and
+#                the wait. A person is "free from" the latest end: of their active
+#                epics. Owner slugs match a person's `alias` in [[people]] (which
+#                defaults to a slug of the name, e.g. "Ana Souza" -> "ana-souza").
 #
-# The slug after owner: must match a person's `alias` in [[people]] (which
-# defaults to a slug of their name, e.g. "Ana Souza" -> "ana-souza").
-#
-# An epic with any owner: label is FACT — the tool schedules exactly those people.
-# An epic with none is open backlog, and the tool suggests an owner (`./dpe suggest`).
-# `./dpe validate` flags owner labels that don't cover the epic's skills, and
-# anyone owning more than 100% across all their epics.
+# `./dpe validate` flags owner labels that don't cover the epic's skills, epics
+# scheduled with no owner, and periods that run past the Jira Due date.
 #
 # ---------------------------------------------------------------------------
 # Jira Cloud API access (REST v3).
