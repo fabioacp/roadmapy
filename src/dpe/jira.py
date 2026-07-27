@@ -54,6 +54,8 @@ class Epic:
     min_seniority: str | None
     due: date | None
     owners: list[Owner] = field(default_factory=list)  # empty = open backlog
+    planned_start: date | None = None   # from a start: label
+    planned_end: date | None = None     # from an end: label
     labels: list[str] = field(default_factory=list)
     priority_forced: bool = False   # came from [priority] in the config, not Jira
     jira_priority: str = ""         # what Jira said, before the override
@@ -65,6 +67,11 @@ class Epic:
     @property
     def owned(self) -> bool:
         return bool(self.owners)
+
+    @property
+    def scheduled(self) -> bool:
+        """Has a planned period (start: and end: labels) — it goes on the timeline."""
+        return self.planned_start is not None and self.planned_end is not None
 
 
 _DATE_FORMATS = ("%Y-%m-%d", "%d/%b/%y", "%d/%b/%y %I:%M %p", "%d/%m/%Y", "%m/%d/%Y")
@@ -136,6 +143,12 @@ def normalize(cfg: Config, raw: RawIssue) -> Epic | None:
         priority = forced
 
     owners = _parse_owners(cfg, raw, where)
+    planned_start = _parse_period_label(spec.start_label_prefix, raw, where)
+    planned_end = _parse_period_label(spec.end_label_prefix, raw, where)
+    if planned_start and planned_end and planned_end < planned_start:
+        raise JiraError(
+            f"{where}: end ({planned_end}) is before start ({planned_start})"
+        )
 
     assignee = raw.assignee
     if assignee and cfg.person(assignee) is None:
@@ -154,9 +167,25 @@ def normalize(cfg: Config, raw: RawIssue) -> Epic | None:
         skills=skills,
         min_seniority=min_seniority,
         owners=owners,
+        planned_start=planned_start,
+        planned_end=planned_end,
         due=parse_jira_date(raw.due) if raw.due else None,
         labels=list(raw.labels),
     )
+
+
+def _parse_period_label(prefix: str, raw: RawIssue, where: str) -> date | None:
+    """Read a single start:/end: label into a date, e.g. start:2026-07-01."""
+    for lb in raw.labels:
+        if lb.lower().startswith(prefix.lower()):
+            value = lb[len(prefix):].strip()
+            parsed = parse_jira_date(value)
+            if parsed is None:
+                raise JiraError(
+                    f"{where}: label {lb!r} — {value!r} is not a date (use YYYY-MM-DD)"
+                )
+            return parsed
+    return None
 
 
 def _parse_owners(cfg: Config, raw: RawIssue, where: str) -> list[Owner]:

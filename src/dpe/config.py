@@ -72,6 +72,8 @@ class JiraSpec:
     skill_label_prefix: str
     min_seniority_label_prefix: str
     owner_label_prefix: str
+    start_label_prefix: str
+    end_label_prefix: str
     done_statuses: set[str]
     priority_order: list[str]
 
@@ -287,6 +289,8 @@ def load(path: Path) -> Config:
         skill_label_prefix=str(jira_raw.get("skill_label_prefix", "skill:")),
         min_seniority_label_prefix=str(jira_raw.get("min_seniority_label_prefix", "min:")),
         owner_label_prefix=str(jira_raw.get("owner_label_prefix", "owner:")),
+        start_label_prefix=str(jira_raw.get("start_label_prefix", "start:")),
+        end_label_prefix=str(jira_raw.get("end_label_prefix", "end:")),
         done_statuses={str(s).lower() for s in jira_raw.get("done_statuses", [])},
         priority_order=[str(p) for p in jira_raw.get("priority_order", [])],
     )

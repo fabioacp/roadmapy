@@ -1,12 +1,196 @@
 {
-  "_comment": "Fixture in the shape of GET /rest/api/3/search/jql (Jira Cloud REST v3). Used by StubTransport. Same epics as the raw CSV so source=csv and source=api match.",
+  "_comment": "Fixture GET /rest/api/3/search/jql. Same epics as raw CSV.",
   "issues": [
     {
       "id": "10000",
-      "key": "DPE-1011",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1011",
+      "key": "DPE-201",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-201",
       "fields": {
-        "summary": "Migrate EKS clusters to 1.31",
+        "summary": "Replace nginx with API gateway — prod clusters",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Andrew",
+          "emailAddress": "andrew@yourcompany.com",
+          "accountId": "5f00000000000000000000000000"
+        },
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:kubernetes",
+          "skill:api-gateway",
+          "owner:andrew",
+          "start:2026-07-07",
+          "end:2026-09-19"
+        ],
+        "duedate": "2026-09-30",
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10001",
+      "key": "DPE-215",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-215",
+      "fields": {
+        "summary": "Ingress controller consolidation",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Andrew",
+          "emailAddress": "andrew@yourcompany.com",
+          "accountId": "5f00000000000000000000000001"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:kubernetes",
+          "skill:networking",
+          "owner:andrew",
+          "start:2026-09-21",
+          "end:2026-12-18"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10002",
+      "key": "DPE-216",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-216",
+      "fields": {
+        "summary": "Service mesh rollout",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Andrew",
+          "emailAddress": "andrew@yourcompany.com",
+          "accountId": "5f00000000000000000000000002"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:kubernetes",
+          "skill:networking",
+          "owner:andrew",
+          "start:2027-01-05",
+          "end:2027-06-30"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10003",
+      "key": "DPE-202",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-202",
+      "fields": {
+        "summary": "Replace nginx with API gateway — non-prod clusters",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Mayank",
+          "emailAddress": "mayank@yourcompany.com",
+          "accountId": "5f00000000000000000000000003"
+        },
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:kubernetes",
+          "skill:api-gateway",
+          "owner:mayank",
+          "start:2026-07-07",
+          "end:2026-09-26"
+        ],
+        "duedate": "2026-09-30",
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10004",
+      "key": "DPE-217",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-217",
+      "fields": {
+        "summary": "API gateway rate limiting & authz",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Mayank",
+          "emailAddress": "mayank@yourcompany.com",
+          "accountId": "5f00000000000000000000000004"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:api-gateway",
+          "owner:mayank",
+          "start:2026-09-28",
+          "end:2026-12-31"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10005",
+      "key": "DPE-218",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-218",
+      "fields": {
+        "summary": "Edge TLS automation",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Mayank",
+          "emailAddress": "mayank@yourcompany.com",
+          "accountId": "5f00000000000000000000000005"
+        },
+        "priority": {
+          "name": "Low"
+        },
+        "labels": [
+          "skill:networking",
+          "owner:mayank",
+          "start:2027-01-05",
+          "end:2027-04-30"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10006",
+      "key": "DPE-203",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-203",
+      "fields": {
+        "summary": "Developer platform improvements — self-service",
         "status": {
           "name": "In Progress",
           "statusCategory": {
@@ -16,267 +200,139 @@
         "assignee": {
           "displayName": "Alex",
           "emailAddress": "alex@yourcompany.com",
-          "accountId": "5f00000000000000000000000000"
+          "accountId": "5f00000000000000000000000006"
         },
         "priority": {
-          "name": "Highest"
+          "name": "Medium"
         },
         "labels": [
-          "skill:kubernetes",
           "skill:terraform",
-          "min:senior",
-          "owner:alex"
+          "skill:ci-cd",
+          "owner:alex",
+          "start:2026-07-01",
+          "end:2026-09-12"
         ],
         "duedate": "2026-09-30",
-        "customfield_10016": 13.0
-      }
-    },
-    {
-      "id": "10001",
-      "key": "DPE-1021",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1021",
-      "fields": {
-        "summary": "Golden path for Go services in Backstage",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "High"
-        },
-        "labels": [
-          "skill:backstage",
-          "skill:go"
-        ],
-        "duedate": "2026-11-30",
-        "customfield_10016": 21.0
-      }
-    },
-    {
-      "id": "10002",
-      "key": "DPE-1031",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1031",
-      "fields": {
-        "summary": "Centralise metrics and traces in OTel Collector",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": {
-          "displayName": "Daniell",
-          "emailAddress": "daniell@yourcompany.com",
-          "accountId": "5f00000000000000000000000002"
-        },
-        "priority": {
-          "name": "High"
-        },
-        "labels": [
-          "skill:observability",
-          "skill:kubernetes",
-          "owner:daniell:60"
-        ],
-        "duedate": null,
-        "customfield_10016": 13.0
-      }
-    },
-    {
-      "id": "10003",
-      "key": "DPE-1041",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1041",
-      "fields": {
-        "summary": "Self-service S3 buckets via Terraform module",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "Medium"
-        },
-        "labels": [
-          "skill:terraform",
-          "skill:aws"
-        ],
-        "duedate": "2026-09-15",
-        "customfield_10016": 8.0
-      }
-    },
-    {
-      "id": "10004",
-      "key": "DPE-1051",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1051",
-      "fields": {
-        "summary": "Standardise CI pipelines into a reusable template",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "Medium"
-        },
-        "labels": [
-          "skill:ci-cd"
-        ],
-        "duedate": null,
-        "customfield_10016": 13.0
-      }
-    },
-    {
-      "id": "10005",
-      "key": "DPE-1061",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1061",
-      "fields": {
-        "summary": "Automatic secret rotation in Vault",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "High"
-        },
-        "labels": [
-          "skill:terraform",
-          "skill:aws",
-          "min:senior"
-        ],
-        "duedate": "2026-10-31",
-        "customfield_10016": 8.0
-      }
-    },
-    {
-      "id": "10006",
-      "key": "DPE-1071",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1071",
-      "fields": {
-        "summary": "Cost dashboard per squad",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "Low"
-        },
-        "labels": [
-          "skill:python",
-          "skill:aws"
-        ],
-        "duedate": null,
-        "customfield_10016": 5.0
+        "customfield_10016": null
       }
     },
     {
       "id": "10007",
-      "key": "DPE-1081",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1081",
+      "key": "DPE-204",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-204",
       "fields": {
-        "summary": "Rust build runtime for the monorepo",
+        "summary": "Developer platform improvements — golden paths",
         "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "Medium"
-        },
-        "labels": [
-          "skill:rust"
-        ],
-        "duedate": null,
-        "customfield_10016": 21.0
-      }
-    },
-    {
-      "id": "10008",
-      "key": "DPE-1091",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1091",
-      "fields": {
-        "summary": "Ephemeral PR environments",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "High"
-        },
-        "labels": [
-          "skill:kubernetes",
-          "skill:ci-cd",
-          "owner:alex:50",
-          "owner:daniell:50"
-        ],
-        "duedate": "2026-12-15",
-        "customfield_10016": 21.0
-      }
-    },
-    {
-      "id": "10009",
-      "key": "DPE-1101",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1101",
-      "fields": {
-        "summary": "Autoscaling for CI runners",
-        "status": {
-          "name": "To Do",
+          "name": "In Progress",
           "statusCategory": {
             "key": "indeterminate"
           }
         },
         "assignee": {
-          "displayName": "Karthi",
-          "emailAddress": "karthi@yourcompany.com",
+          "displayName": "Alex",
+          "emailAddress": "alex@yourcompany.com",
+          "accountId": "5f00000000000000000000000007"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:terraform",
+          "owner:alex",
+          "start:2026-09-14",
+          "end:2026-12-04"
+        ],
+        "duedate": "2026-09-30",
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10008",
+      "key": "DPE-219",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-219",
+      "fields": {
+        "summary": "Terraform module registry",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Alex",
+          "emailAddress": "alex@yourcompany.com",
+          "accountId": "5f00000000000000000000000008"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:terraform",
+          "skill:aws",
+          "owner:alex",
+          "start:2027-01-05",
+          "end:2027-02-20"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10009",
+      "key": "DPE-205",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-205",
+      "fields": {
+        "summary": "Developer platform improvements — docs & templates",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Brad",
+          "emailAddress": "brad@yourcompany.com",
           "accountId": "5f00000000000000000000000009"
         },
         "priority": {
           "name": "Medium"
         },
         "labels": [
+          "skill:python",
           "skill:ci-cd",
-          "skill:go",
-          "owner:karthi"
+          "owner:brad",
+          "start:2026-07-01",
+          "end:2026-09-15"
         ],
-        "duedate": null,
-        "customfield_10016": 8.0
+        "duedate": "2026-09-30",
+        "customfield_10016": null
       }
     },
     {
       "id": "10010",
-      "key": "DPE-1111",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1111",
+      "key": "DPE-220",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-220",
       "fields": {
-        "summary": "Automated repository onboarding",
+        "summary": "Backstage plugin suite",
         "status": {
-          "name": "To Do",
+          "name": "In Progress",
           "statusCategory": {
             "key": "indeterminate"
           }
         },
-        "assignee": null,
+        "assignee": {
+          "displayName": "Brad",
+          "emailAddress": "brad@yourcompany.com",
+          "accountId": "5f00000000000000000000000010"
+        },
         "priority": {
           "name": "Low"
         },
         "labels": [
           "skill:python",
-          "skill:ci-cd"
+          "owner:brad",
+          "start:2026-09-16",
+          "end:2026-11-20"
         ],
         "duedate": null,
         "customfield_10016": null
@@ -284,10 +340,133 @@
     },
     {
       "id": "10011",
-      "key": "DPE-1121",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1121",
+      "key": "DPE-206",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-206",
       "fields": {
-        "summary": "SLOs and alerting as code",
+        "summary": "Artifactory remediation",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Karthi",
+          "emailAddress": "karthi@yourcompany.com",
+          "accountId": "5f00000000000000000000000011"
+        },
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:artifactory",
+          "skill:security",
+          "owner:karthi",
+          "start:2026-07-01",
+          "end:2026-10-31"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10012",
+      "key": "DPE-221",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-221",
+      "fields": {
+        "summary": "Vault secrets platform",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Karthi",
+          "emailAddress": "karthi@yourcompany.com",
+          "accountId": "5f00000000000000000000000012"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:security",
+          "owner:karthi",
+          "start:2026-11-02",
+          "end:2027-01-29"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10013",
+      "key": "DPE-207",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-207",
+      "fields": {
+        "summary": "AI foundation platform",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Daniell",
+          "emailAddress": "daniell@yourcompany.com",
+          "accountId": "5f00000000000000000000000013"
+        },
+        "priority": {
+          "name": "High"
+        },
+        "labels": [
+          "skill:ai",
+          "skill:python",
+          "owner:daniell",
+          "start:2026-07-14",
+          "end:2026-11-28"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10014",
+      "key": "DPE-222",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-222",
+      "fields": {
+        "summary": "ML pipeline templates",
+        "status": {
+          "name": "In Progress",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": {
+          "displayName": "Daniell",
+          "emailAddress": "daniell@yourcompany.com",
+          "accountId": "5f00000000000000000000000014"
+        },
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:ai",
+          "skill:python",
+          "owner:daniell",
+          "start:2026-11-30",
+          "end:2027-06-30"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10015",
+      "key": "DPE-210",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-210",
+      "fields": {
+        "summary": "CICD pipeline improvements — parallel test stages",
         "status": {
           "name": "To Do",
           "statusCategory": {
@@ -299,19 +478,134 @@
           "name": "Medium"
         },
         "labels": [
-          "skill:observability",
-          "skill:python"
+          "skill:ci-cd"
         ],
         "duedate": null,
-        "customfield_10016": 13.0
+        "customfield_10016": null
       }
     },
     {
-      "id": "10012",
-      "key": "DPE-1131",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1131",
+      "id": "10016",
+      "key": "DPE-211",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-211",
       "fields": {
-        "summary": "Decommission legacy Jenkins",
+        "summary": "CICD pipeline improvements — build caching",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:ci-cd"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10017",
+      "key": "DPE-212",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-212",
+      "fields": {
+        "summary": "CICD pipeline improvements — self-service templates",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Low"
+        },
+        "labels": [
+          "skill:ci-cd",
+          "skill:python"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10018",
+      "key": "DPE-213",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-213",
+      "fields": {
+        "summary": "Kubernetes cost optimisation",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Medium"
+        },
+        "labels": [
+          "skill:kubernetes"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10019",
+      "key": "DPE-214",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-214",
+      "fields": {
+        "summary": "Secrets management rollout",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Low"
+        },
+        "labels": [
+          "skill:security"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10020",
+      "key": "DPE-223",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-223",
+      "fields": {
+        "summary": "Rust build tooling",
+        "status": {
+          "name": "To Do",
+          "statusCategory": {
+            "key": "indeterminate"
+          }
+        },
+        "assignee": null,
+        "priority": {
+          "name": "Low"
+        },
+        "labels": [
+          "skill:rust"
+        ],
+        "duedate": null,
+        "customfield_10016": null
+      }
+    },
+    {
+      "id": "10021",
+      "key": "DPE-199",
+      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-199",
+      "fields": {
+        "summary": "Decommission legacy CI server",
         "status": {
           "name": "Done",
           "statusCategory": {
@@ -319,9 +613,9 @@
           }
         },
         "assignee": {
-          "displayName": "Daniell",
-          "emailAddress": "daniell@yourcompany.com",
-          "accountId": "5f00000000000000000000000012"
+          "displayName": "Karthi",
+          "emailAddress": "karthi@yourcompany.com",
+          "accountId": "5f00000000000000000000000021"
         },
         "priority": {
           "name": "Medium"
@@ -330,30 +624,7 @@
           "skill:ci-cd"
         ],
         "duedate": null,
-        "customfield_10016": 8.0
-      }
-    },
-    {
-      "id": "10013",
-      "key": "DPE-1141",
-      "self": "https://yourcompany.atlassian.net/rest/api/3/issue/DPE-1141",
-      "fields": {
-        "summary": "Service catalogue in Backstage",
-        "status": {
-          "name": "To Do",
-          "statusCategory": {
-            "key": "indeterminate"
-          }
-        },
-        "assignee": null,
-        "priority": {
-          "name": "High"
-        },
-        "labels": [
-          "skill:backstage"
-        ],
-        "duedate": "2026-10-15",
-        "customfield_10016": 13.0
+        "customfield_10016": null
       }
     }
   ],

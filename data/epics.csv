@@ -1,15 +1,23 @@
 Issue key,Summary,Status,Assignee,Priority,Custom field (Story Points),Labels,Due date
-DPE-1011,Migrate EKS clusters to 1.31,In Progress,Alex,Highest,13,skill:kubernetes skill:terraform min:senior owner:alex,2026-09-30
-DPE-1021,Golden path for Go services in Backstage,To Do,,High,21,skill:backstage skill:go,2026-11-30
-DPE-1031,Centralise metrics and traces in OTel Collector,To Do,Daniell,High,13,skill:observability skill:kubernetes owner:daniell:60,
-DPE-1041,Self-service S3 buckets via Terraform module,To Do,,Medium,8,skill:terraform skill:aws,2026-09-15
-DPE-1051,Standardise CI pipelines into a reusable template,To Do,,Medium,13,skill:ci-cd,
-DPE-1061,Automatic secret rotation in Vault,To Do,,High,8,skill:terraform skill:aws min:senior,2026-10-31
-DPE-1071,Cost dashboard per squad,To Do,,Low,5,skill:python skill:aws,
-DPE-1081,Rust build runtime for the monorepo,To Do,,Medium,21,skill:rust,
-DPE-1091,Ephemeral PR environments,To Do,,High,21,skill:kubernetes skill:ci-cd owner:alex:50 owner:daniell:50,2026-12-15
-DPE-1101,Autoscaling for CI runners,To Do,Karthi,Medium,8,skill:ci-cd skill:go owner:karthi,
-DPE-1111,Automated repository onboarding,To Do,,Low,,skill:python skill:ci-cd,
-DPE-1121,SLOs and alerting as code,To Do,,Medium,13,skill:observability skill:python,
-DPE-1131,Decommission legacy Jenkins,Done,Daniell,Medium,8,skill:ci-cd,
-DPE-1141,Service catalogue in Backstage,To Do,,High,13,skill:backstage,2026-10-15
+DPE-201,Replace nginx with API gateway — prod clusters,In Progress,Andrew,High,0,skill:kubernetes skill:api-gateway owner:andrew start:2026-07-07 end:2026-09-19,2026-09-30
+DPE-215,Ingress controller consolidation,In Progress,Andrew,Medium,0,skill:kubernetes skill:networking owner:andrew start:2026-09-21 end:2026-12-18,
+DPE-216,Service mesh rollout,In Progress,Andrew,Medium,0,skill:kubernetes skill:networking owner:andrew start:2027-01-05 end:2027-06-30,
+DPE-202,Replace nginx with API gateway — non-prod clusters,In Progress,Mayank,High,0,skill:kubernetes skill:api-gateway owner:mayank start:2026-07-07 end:2026-09-26,2026-09-30
+DPE-217,API gateway rate limiting & authz,In Progress,Mayank,Medium,0,skill:api-gateway owner:mayank start:2026-09-28 end:2026-12-31,
+DPE-218,Edge TLS automation,In Progress,Mayank,Low,0,skill:networking owner:mayank start:2027-01-05 end:2027-04-30,
+DPE-203,Developer platform improvements — self-service,In Progress,Alex,Medium,0,skill:terraform skill:ci-cd owner:alex start:2026-07-01 end:2026-09-12,2026-09-30
+DPE-204,Developer platform improvements — golden paths,In Progress,Alex,Medium,0,skill:terraform owner:alex start:2026-09-14 end:2026-12-04,2026-09-30
+DPE-219,Terraform module registry,In Progress,Alex,Medium,0,skill:terraform skill:aws owner:alex start:2027-01-05 end:2027-02-20,
+DPE-205,Developer platform improvements — docs & templates,In Progress,Brad,Medium,0,skill:python skill:ci-cd owner:brad start:2026-07-01 end:2026-09-15,2026-09-30
+DPE-220,Backstage plugin suite,In Progress,Brad,Low,0,skill:python owner:brad start:2026-09-16 end:2026-11-20,
+DPE-206,Artifactory remediation,In Progress,Karthi,High,0,skill:artifactory skill:security owner:karthi start:2026-07-01 end:2026-10-31,
+DPE-221,Vault secrets platform,In Progress,Karthi,Medium,0,skill:security owner:karthi start:2026-11-02 end:2027-01-29,
+DPE-207,AI foundation platform,In Progress,Daniell,High,0,skill:ai skill:python owner:daniell start:2026-07-14 end:2026-11-28,
+DPE-222,ML pipeline templates,In Progress,Daniell,Medium,0,skill:ai skill:python owner:daniell start:2026-11-30 end:2027-06-30,
+DPE-210,CICD pipeline improvements — parallel test stages,To Do,,Medium,0,skill:ci-cd,
+DPE-211,CICD pipeline improvements — build caching,To Do,,Medium,0,skill:ci-cd,
+DPE-212,CICD pipeline improvements — self-service templates,To Do,,Low,0,skill:ci-cd skill:python,
+DPE-213,Kubernetes cost optimisation,To Do,,Medium,0,skill:kubernetes,
+DPE-214,Secrets management rollout,To Do,,Low,0,skill:security,
+DPE-223,Rust build tooling,To Do,,Low,0,skill:rust,
+DPE-199,Decommission legacy CI server,Done,Karthi,Medium,0,skill:ci-cd,
